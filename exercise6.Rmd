@@ -1,0 +1,166 @@
+---
+title: "Exercise 6"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+Binomial with unknown probability and sample size: some of the difficulties with setting prior distributions in multiparameter models can be illustrated with the simple binomial distribution. Consider data $y_1,...,y_n$ modeled as independent $Bin(N, θ)$, with both $N$ and $θ$ unknown. Defining a convenient family of prior distributions on $(N, θ)$ is difficult,partly because of the discreteness of N.  
+Raftery (1988) considers a hierarchical approach based on assigning the parameter $N$ a Poisson distribution with unknown mean $µ$. To define a prior distribution on $(θ, N)$, Raftery defines $λ = µθ$ and specifies a prior distribution on $(λ, θ)$. The prior distribution is specified in terms of $λ$ rather than $µ$ because ‘it would seem easier to formulate prior information about $λ$, the unconditional expectation of the observations, than about $µ$, the mean of the unobserved quantity $N$.’  
+a. A suggested noninformative prior distribution is $p(λ, θ) ∝ \frac{1}{\lambda}$. What is a motivation for this noninformative distribution? Is the distribution improper? Transform to determine $p(N, θ)$.
+
+*Solution*  
+A motivation for the prior distribution $p(\lambda,\theta) {\propto} \frac{1}{\lambda}$ can be described as follows:
+First, we realize that the prior information about $\lambda$ would be more precise than that about $\mu$ or $\theta$, so we assume $\lambda$ and $\theta$ are independent a priori (rather than $\mu$ and $\theta$). As a result, we can write $p(\lambda,\theta) = p(\lambda)p(\theta)$. To express our lack of initial knowledge, we take $\theta \sim U[0,1]$, as $\theta$ is the probability of success in each one of the $N$ Bernoulli trials conducted, so $\theta \in [0,1]$. We express our ignorance for $\lambda$ a little differently: since $\lambda = \mu\theta$, we can assume that $\lambda > 0$ (as $\theta = 0$ is a trivial case), and therefore take $log\lambda {\propto} 1$. If $\phi = log\lambda$, then $p(\lambda) = p(\phi)|\frac{d\phi}{d\lambda}| {\propto} 1\frac{1}{\lambda}$. We deduce that $p(\lambda,\theta) = p(\lambda)p(\theta) {\propto} \frac{1}{\lambda}$. This prior is improper, as $\int_{0}^{1}\int_{0}^{+\infty}\frac{1}{\lambda}d\lambda d\theta = ln\lambda|_0^{+\infty}$, which is undefined.
+Now, let's transform to determine $p(N,\theta)$:  
+Since $N|\lambda,\theta \sim Pois(\mu)$ and $\mu = \frac{\lambda}{\theta}$, we have that $p(N,\lambda,\theta) = p(N|\lambda,\theta)p(\lambda,\theta) \propto \frac{(\frac{\lambda}{\theta})^Ne^-\frac{\lambda}{\theta}}{N!}\frac{1}{\lambda}$,
+so $\begin{eqnarray*} p(N,\theta) &=& \int_0^{+\infty}p(N,\lambda,\theta)d\lambda\\ &\propto& \frac{Γ(N)}{N!}\int_0^{+\infty}\frac{1}{Γ(N)\theta^N}\lambda^{N-1}e^-\frac{\lambda}{\theta}d\lambda\\ &\propto& \frac{1}{N}\end{eqnarray*}$  
+because $f(\lambda) = \frac{1}{Γ(N)\theta^N}\lambda^{N-1}e^-\frac{\lambda}{\theta}$ is the p.d.f. of $\Gamma(N,\theta)$.
+
+
+\noindent b. The Bayesian method is illustrated on counts of waterbuck obtained by remote photography on five separate days in Kruger Park in South Africa. The counts were 53, 57, 66, 67, and 72. Perform the Bayesian analysis on these data and display a scatterplot of posterior simulations of (N, θ). What is the posterior probability that N > 100?
+
+*Solution*  
+First, let's find our joint posterior distribution, if $y_i, 1 \leq i \leq 5$ denote the counts of waterbuck on each of five seperate days respectively, and $y = (y_1,y_2,y_3,y_4,y_5)$:  
+$\begin{eqnarray*} p(N,\theta|y) &\propto& p(N,\theta)p(y|N,\theta)\\ &\propto& \frac{1}{N} \prod\limits_{i=1}^5\binom{N}{y_i}\theta^{y_i}(1-\theta)^{N-y_i}\\ &\propto& \frac{1}{N}\theta^{\sum\limits_{i=1}^5y_i}(1-\theta)^{5N-\sum\limits_{i=1}^5y_i}\prod\limits_{i=1}^5\binom{N}{y_i}\end{eqnarray*}$  
+for $\theta \in [0,1]$ and $N \geq 72 = y_{max}$. Now, we can find the unnormalized marginal distribution of $N$ as follows:
+$\begin{eqnarray*} p(N|y) &=& \int_0^1p(N,\theta|y)d\theta\\ &\propto& \frac{1}{N}\prod\limits_{i=1}^5\binom{N}{y_i}\int_0^1\theta^{\sum\limits_{i=1}^5y_i}(1-\theta)^{5N-\sum\limits_{i=1}^5y_i}d\theta\\ &\propto& \frac{1}{N}\prod\limits_{i=1}^5\binom{N}{y_i}Β(\sum\limits_{i=1}^5y_i+1,5N-\sum\limits_{i=1}^5y_i+1)\\ &\propto& \frac{1}{N}\prod\limits_{i=1}^5\binom{N}{y_i}\frac{\Gamma(5N-\sum\limits_{i=1}^5y_i+1)}{\Gamma(5N+2)}\\ &\propto& \frac{(5N-\sum\limits_{i=1}^5y_i)!}{(5N+1)!}\frac{1}{N}\prod\limits_{i=1}^5\binom{N}{y_i}\\ &\propto& \frac{1}{\prod\limits_{k = 5N - \sum\limits_{i=1}^5y_i+1}^{5N+1}k}\frac{1}{N}\prod\limits_{i=1}^5\binom{N}{y_i} \end{eqnarray*}$  
+for $N \geq 72$. In order to simulate from the joint posterior, we will also need the conditional posterior of $\theta$, which can be obtained through the joint posterior with $N$ held constant:
+$p(\theta|N,y) \propto \theta^{\sum\limits_{i=1}^5y_i}(1-\theta)^{5N-\sum\limits_{i=1}^5y_i}$, so we deduct that $\theta|N,y \sim Beta(\sum\limits_{i=1}^5y_i+1,5N-\sum\limits_{i=1}^5y_i+1)$ for $\theta \in [0,1]$.  
+In order to simulate a couple $(N,\theta)$ from the joint posterior distribution, we will follow the steps below:  
+1. Simulate a $N$ from $N|y$  
+2. Simulate a $\theta$ from $\theta|N,y$  
+Since we have found the distribution of $\theta|N,y$, there is only one problem -the marginal distribution of $N$ does not seem to fit any well known distribution. However, we can simulate from this distribution by using the inverse c.d.f. method. For this method to work, we will need the normalized marginal function of $N$. We obtain this by dividing our function with the normalizing constant, that is, the sum of the values of the marginal function for every possible $N$. Since the marginal probability decays extremely fast as $N$ increases, here we will assume that $N$ ranges from 1 to 1000. Additionaly, in order to avoid underflow and overflow operations, we will compute the logarithm of the unnormalized distribution and subtract off the maximum value before exponentiating and normalizing.
+```{r}
+y <- c(53,57,66,67,72)
+
+
+N_marginal <- function(N) {
+  if (N<=72) {
+    return(-Inf)
+  }
+  den <- log(N)
+  num <- 0
+  for (i in (5*N-sum(y)+1):(5*N+1)) {
+    den <- den+log(i)
+  }
+  for (i in 1:5) {
+    num <- num+log(choose(N,y[i]))
+  }
+  return(num-den)
+}
+
+values <- mapply(N_marginal,seq(1,1000))
+values <- values - max(values)
+norm_const <- sum(exp(values))
+normalized <- exp(values)/norm_const
+```
+Let's take a look at our normalized marginal function (and verify that we can indeed take $N=1,...,1000$).
+```{r}
+plot(normalized, col = "skyblue", type = "l",lwd = 2, xlab = "N", ylab = "p(N|y)")
+```
+  
+Now, we are ready to simulate from the posterior. We will display a scatterplot of 1000 posterior simulations of $(N,\theta)$
+
+```{r}
+inv_method <- function(p) {
+  u  <- runif(1)
+  if (u <= p[1]) {
+    return(1)
+  }
+  for (k in 2:length(p)) {
+    if (sum(p[1:(k-1)]) < u && u <= sum(p[1:k])) {
+      return(k)
+    }
+  }
+}
+
+set.seed(123)
+iter <- 1000
+X <- array(dim=c(iter, 2))
+for (i in 1:iter) {
+  X[i,1] <- inv_method(normalized)
+  X[i,2] <- rbeta(1,sum(y)+1,5*X[i,1]-sum(y)+1)
+}
+plot(X, xlab = "N", ylab = "θ", col = "purple", main = "Scatterplot of 1000 posterior simulations of (N,θ)")
+```
+  
+Now, in order to compute the probability of $N>100$ we will use our normalized function. More specifically, we will sum the values of the normalized function for $N>100$, that is, for $N=101,...,1000$.
+```{r}
+p <- sum(normalized[101:1000])
+```
+  
+\noindent c. Why not simply use a Poisson with fixed $µ$ as a prior distribution for $N$?
+
+*Solution*  
+As no prior information is available, we would not know which $\mu$ to pick beforehand, which creates the risk of an unreasonable choice. For example, we did not know a priori that after the value $N = 1000$ the value of the marginal posterior function of $N$ is approximately zero, so if we were to choose $\mu = 1000$, that would be a mispecification of the prior. This can be eventually counterbalanced by the influence of the data, however in this problem only 5 data points are available. Thus, the safest option is to pick an uninformative prior.  
+  
+#### BONUS: Trial and Error
+Following our train of thought from the last question, let's examine our theory that using a Poisson with fixed $\mu = 1000$ as a prior distribution for $N$ could negatively affect our analysis, especially given that our data points are only 5.  
+Say that we have not yet obtained any information about the posterior marginal distribution of $N$, and we want to answer question (b). We can do that with the help of a Metropolis-Hastings algorithm as follows: since we know the posterior conditional distribution of $\theta$, which is $Beta(\sum\limits_{i=1}^5y_i+1,5N-\sum\limits_{i=1}^5y_i+1)$, we can implement a hybrid MH with algorithm with a Gibbs step for $\theta$. For $N$, we can use its prior $Pois(1000)$ as the proposal. As a result, our acceptance probability will be $ap(x,y) = min\{\frac{f(y)q(x[1]|y[1])p(x[2])}{f(x)q(y[1]|x[1])p(x[2])},1\}$, where $x=(x[1],x[2]) =(N_{old},\theta_{old})$ is the old value, $y=(y[1],y[2]) =(N_{new},\theta_{new})$ is the simulated value, $f$ is the posterior function of $(N,\theta)$, which we have previously obtained, $q$ is the p.d.f. of $Pois(1000)$ and $p$ is the p.d.f. of $Beta(\sum\limits_{i=1}^5y_i+1,5x[1]-\sum\limits_{i=1}^5y_i+1)$. Our algorithm works as follows, in a random iteration $t$:  
+For a given $x_{t} = (N_{t}, \theta_{t})$,  
+1. We simulate $y_t = (N,\theta)$, where $N \sim Pois(1000)$, $\theta \sim Beta(\sum\limits_{i=1}^5y_i+1,5N_t-\sum\limits_{i=1}^5y_i+1)$  
+2. We choose $\begin{equation*} x_{t+1} = \left\{ \begin{array}{ccl} y_t & \text{with prob.} & ap\left(x_t, y_t\right) \\ x_t & \text{with prob.} & 1-ap\left(x_t, y_t\right) \end{array}\right.\end{equation*}$
+
+
+```{r}
+y <- c(53,57,66,67,72)
+
+posterior <- function(par) {
+  1/par[1]*prod(dbinom(y,par[1],par[2]))
+}
+
+library(coda)
+metrop <- function(init,iter=10000,burnin=5001) {
+  X <- array(dim=c(iter + 1, 2))
+  X[1,] <- init
+  for (i in 1:iter) {
+    Y <- c(rpois(1,1000), rbeta(1,sum(y)+1,5*X[i,1]-sum(y)+1))
+    ap <- (posterior(Y)*dpois(Y[1],1000))/(posterior(X[i,])*dpois(X[i,1],1000))
+    X[i+1,] <- X[i,] + (Y-X[i,])*(runif(1) < ap)
+  }
+  X <- X[-(1:burnin),]
+  X = data.frame(N=X[,1], theta=X[,2])
+  return(X)
+}
+
+set.seed(789)
+
+chain <- metrop(c(500,0.5))
+plot(chain)
+plot(mcmc(chain))
+par(mfrow=c(1,2))
+acf(chain[,1])
+acf(chain[,2])
+```
+  
+We observe that our trace and density plots indicate good mixing, while both the acf plots for $\theta$ and $N$ look acceptable and drop to zero quite quickly. However, the scatterplot of our simulations from the posterior distribution looks completely different than the one we obtained in (b), and, consequently, displays a contrasting (and misleading) relationship between the parameters $N$, $\theta$. It is notable that, in this case, the MH algorithm has no way of notifying us of our error as everything looks in order. As a result, had we not performed the previous analysis about $N$, we would accept this as our final solution unaware of its faults. That's why often times it is a good idea to test our MH in many ways to be sure of our results. Let's pretend we still don't possess the previous knowledge about $N$, but we remain relatively unbiased in our choice of the proposal for $N|y$, and observe our results. We can choose $q(x)$ to be the p.d.f. of the Poisson distribution with mean $\lambda = N[i]$ (if we are in the $i+1$-th iteration),so we obtain $N_{new} \sim Pois(N_{old})$, while everything else remains the same. Our algorithm works as follows, in a random iteration $t$:  
+For a given $x_{t} = (N_{t}, \theta_{t})$,  
+1. We simulate $y_t = (N,\theta)$, where $N \sim Pois(N_t)$, $\theta \sim Beta(\sum\limits_{i=1}^5y_i+1,5N_t-\sum\limits_{i=1}^5y_i+1)$  
+2. We choose $\begin{equation*} x_{t+1} = \left\{ \begin{array}{ccl} y_t & \text{with prob.} & ap\left(x_t, y_t\right) \\ x_t & \text{with prob.} & 1-ap\left(x_t, y_t\right) \end{array}\right.\end{equation*}$
+```{r}
+metrop2 <- function(init,iter=10000,burnin=5001) {
+  X <- array(dim=c(iter + 1, 2))
+  X[1,] <- init
+  for (i in 1:iter) {
+    Y <- c(rpois(1,X[i,1]),rbeta(1,sum(y)+1,5*X[i,1]-sum(y)+1))
+    ap <- (posterior(Y)*dpois(Y[1],X[i,1]))/(posterior(X[i,])*dpois(X[i,1],Y[1]))
+    X[i+1,] <- X[i,] + (Y-X[i,])*(runif(1) < ap)
+  }
+  X <- X[-(1:burnin),]
+  X = data.frame(N=X[, 1], theta=X[, 2])
+  return(X)
+}
+
+chain2 <- metrop2(c(100,0.5))
+plot(chain2)
+plot(mcmc(chain2))
+par(mfrow=c(1,2))
+acf(chain2[,1])
+acf(chain2[,2])
+```  
+  
+Now, we observe that, for the same amount of iterations and burn-in period, our trace and density plots, are not in good shape. Similarly, our acf plots show very slow geometric decay, a phenomenon that is acceptable only in the case of first-order autoregressive models. However, the scatterplot we obtained is much more similar to that in (b) than before.  
+We conclude that initial assumptions about our model and parameters should be made very carefully. On top of that, even if our analysis seems robust and correct, it is always a good idea to verify, test and experiment, in order to be sure that what we obtained is indeed correct, as the tools we have available for testing the convergence of our MH algorithm can only let us know with certainty when our algorithm has not converged, and not the other way around. In order to be more confident in our inference, we can run the chain several times with different starting values, and check that the output from the various chains is very similar. Additionally, it is always best to run long chains with long burn-in periods. It is obvious that the MH algorithm is a powerful tool, but also one that should be used carefully, and with continuous assesment of our analysis and results.
