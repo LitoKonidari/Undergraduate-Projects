@@ -1,0 +1,446 @@
+---
+title: 'Mathematical Statistics Project <img src="uoa.png" style="float: left;" height=140px;
+  /> '
+subtitle: "National and Kapodistrian University of Athens"
+author: Lito Konidari
+date: "Academic Year 2021-2022"
+output:
+  html_document:
+    toc: true
+    toc_depth: 4
+    toc_float: false
+header-includes:
+  - \usepackage{fontspec}  
+  - \usepackage[english,greek]{babel}
+  - \usepackage{amsmath}
+---
+<!-- 
+install.packages("microbenchmark")
+library(microbenchmark)
+library(xaringan)
+inf_mr()
+-->
+
+<!--
+Κώδικας css
+Δοκιμάστε να προσθέσετε την παρακάτω γραμμή στο .title
+border: solid 1px #000
+-->
+
+<script type="text/x-mathjax-config">
+MathJax.Hub.Config({
+  TeX: { equationNumbers: { autoNumber: "AMS" } }
+});
+</script>
+
+<style type="text/css">
+.title {
+
+    font-size: 40px;
+    font-family: Helvetica, Arial, sans-serif;
+    font-weight: bold;
+    color: #4479E3;
+    text-align: left;
+
+}
+.subtitle {
+
+    font-size: 25px;
+    font-family: Helvetica, Arial, sans-serif;
+    font-style: italic;
+    color: #4479E3;
+    text-align: left;
+    margin-top: -3px;
+
+}
+.author {
+
+    font-size: 20px;
+    font-family: Helvetica, Arial, sans-serif;
+    color: #4479E3;
+    text-align: left;
+
+}
+.date {
+
+    font-size: 16px;
+    font-family: Helvetica, Arial, sans-serif;
+    color: #4479E3;
+    text-align: left;
+  
+}
+.table {  
+    
+    margin-left: auto;
+    margin-right: auto;
+    width: 50%;
+
+}
+</style>
+
+***
+### Introduction  
+
+Classified information is received that nuclear weapons have been placed in an unknown location in Athens by foreign secret services. Let us assume that coordinates of this location are $(x_0, y_0)$ and are considered two unknown parameters. All eyes are on you. You are the best statistician in Athens and suburbs and your help is requested in locating the position of the nuclear weapons, as well as estimating the power of these nukes. You must act immediately and assess these parameters of interest in order to then be able to take immediate action to ensure the protection of citizens. The intensity of radioactive radiation recorded at a given distance from the source is considered to be a good indicator that can be used to estimate the unknown parameters. The theoretical relation associating the radiation intensity $I$, as a function of distance $r$, with the radioactive point source of power $P$, is given by:
+\[
+Ι = \frac{P}{4\pi r^2}
+\]
+Various artificial (from the foreign secret services) and natural interferences make accurate measurements difficult. In order to quickly obtain some initial results, a rapid recording of the intensity is made at 20 different points $(x_i, y_i)$. In particular, the following data generation model is given:
+\[
+Z_i = I_i^{-1} \sim N(\mu_i(\beta),\sigma^2)
+\]
+where $\beta = (\beta_1,\beta_2,\beta_3)$, $\beta_1 = 1/P$, $(\beta_2,\beta_3) = (x_0,y_0)$ and $\mu_i(\beta) = 4\pi\beta_1\{(x_i-\beta_2)^2+(y_i-\beta_3)^2\}$.  
+For the project, the following is required.  
+
+### Question (i)  
+Build a program in R that simulates data from this model.  
+  
+
+*SOLUTION*  
+
+```{r}
+# simulated data
+set.seed(123)
+
+load("radiation_data.RData")
+z <- data$inverse_intensity
+x <- data$x_coord
+y <- data$y_coord 
+
+sim_inv_intensity <- function(power, x0, y0, sig, pos){
+  ss <- nrow(pos)
+  data <- 4*pi*(1/power)*((pos[,1]-x0)^2 + (pos[,2]-y0)^2)+ rnorm(ss,m=0,sd=sig)
+  return(data)
+}
+
+# simulate data from the model
+pos <- as.matrix(data[,2:3])
+power <- 500
+zsim <- sim_inv_intensity(power=power, x0=0, y0=0, sig=100, pos=pos)
+```
+  
+
+### Question (ii)  
+Write the likelihood function of the model (for independent observations) and present a way to approximate the maximum likelihood estimator when $θ = (β, σ^2)$. It is recommended to perform appropriate sequential maximization of the parameters and, after finding detailed solutions, considering at each step the rest constant, apply conditional maximization with the help of an appropriate algorithm; that starts from an initial point and revises the estimates at each full step, with the help of 4 successive substeps. If you want, you can compare this method you made with the results given by a numerical optimization algorithm, e.g. see optim() in R. As data use the 20 measurements $z_i$ at points $(x_i, y_i)$ given in the auxiliary R file.  
+  
+
+*SOLUTION*  
+The likelihood function of the model for n independent observations $z_i$ is
+\[
+L_z(\theta) = \prod\limits_{i=1}^nf_{\theta,\sigma^2}(z_i) = (2\pi\sigma^2)^{-\frac{n}{2}}e^{-\frac{1}{2\sigma^2}\sum\limits_{i=1}^n(z_i-\mu_i(\beta))^2}
+\]
+We deduce that, the m.l.e. $\hat\theta = (\hat\beta, \hat{\sigma^2})$ of $\theta = (\beta, \sigma^2)$ can be found by the following relations:
+\[
+\hat\beta = \arg\min\sum\limits_{i=1}^n(z_i - \mu_i(\beta))^2
+\]
+\[
+\hat{\sigma^2} = \frac{1}{n}\sum\limits_{i=1}^n(z_i - \mu_i(\hat\beta))^2
+\]
+so $\sigma^2$ will be estimated after obtaining $\hat\beta$.  
+Let $g(\beta) = \sum\limits_{i=1}^n(z_i - \mu_i(\beta))^2 = \sum\limits_{i=1}^n (z_i - 4\pi\beta_1[(x_i-\beta_2)^2+(y_i-\beta_3)^2])^2$.  
+  
+  
+#### First Solution  
+  
+
+Step 1. Let us consider $\beta_2, \beta_3$ fixed. Then, if $r_i^2(\beta_2,\beta_3) = (x_i-\beta_2)^2+(y_i-\beta_3)^2$, we have, by differentiation:
+\[
+\frac{\partial g}{\partial \beta_1} = 0 \iff \beta^{\star}_1(\beta_2,\beta_3) = \frac{\sum\limits_{i=1}^n z_ir_i^2(\beta_2,\beta_3)}{4\pi\sum\limits_{i=1}^nr_i^4(\beta_2,\beta_3)} \space \space \space(\star)
+\]
+  
+Step 2. By substituting $(\star)$ in $g(\beta)$, after calculations, we have that:
+\[
+g(\beta_2,\beta_3) = \sum\limits_{i=1}^n [z_i - \frac{\sum\limits_{i=1}^n z_i r_i^2}{\sum\limits_{i=1}^n r_i^4} r_i^2]^2 = \sum\limits_{i=1}^n z_i^2 - \frac{(\sum\limits_{i=1}^n z_ir_i^2)^2}{\sum\limits_{i=1}^nr_i^4}
+\]
+
+Step 3. We deduce that $\min\limits_{\beta_2,\beta_3} g(\beta_2,\beta_3) = \max\limits_{\beta_2,\beta_3} \frac{(\sum\limits_{i=1}^n z_i r_i^2)^2}{\sum\limits_{i=1}^n r_i^4}$. So, in order to find $\hat{\beta_2}, \hat{\beta_3}$ we will maximize the root of the function $\frac{(\sum\limits_{i=1}^n z_i r_i^2)^2}{\sum\limits_{i=1}^n r_i^4}$, which is:
+\[
+h(\beta_2, \beta_3) = \frac{\sum\limits_{i=1}^n z_i[(\beta_2-x_i)^2+(\beta_3-y_i)^2]}{\sqrt{\sum\limits_{i=1}^n [(\beta_2-x_i)^2+(\beta_3-y_i)^2]^2}}
+\]
+
+Step 4. After obtaining $(\hat{\beta_2}, \hat{\beta_3}) = \max\limits_{\beta_2,\beta_3} h(\beta_2, \beta_3)$, we can find $\hat{\beta_1}$ through $(\star)$, and, lastly, $\hat{\sigma^2}$.  
+  
+<center> *Algorithmic Implementation using our data* </center>  
+For the initial point of our algorithm, we will choose the position $(\beta_2, \beta_3)$ from our data that gives us the smallest inverse intensity $z$, meaning the point where the power is at its highest.
+```{r}
+initial <- c(x[which(min(z) == z)], y[which(min(z) == z)])
+
+n <- 20
+
+loglike <- function(b,sigma2) {
+  (-n/2)*log(2*pi*sigma2)-(sum((z-4*pi*b[1]*((x-b[2])^2+(y-b[3])^2))^2))/(2*sigma2)
+}
+
+h <- function(c) {
+  num <- sum(z*((c[1]-x)^2+(c[2]-y)^2))
+  den <- sqrt(sum(((c[1]-x)^2+(c[2]-y)^2)^2))
+  return(-num/den)
+}
+
+b2 <- optim(initial, h, method = "BFGS")$par[1]
+b3 <- optim(initial, h, method = "BFGS")$par[2]
+
+b1 <- sum(z*((b2-x)^2+(b3-y)^2))/(4*pi*sum(((b2-x)^2+(b3-y)^2)^2))
+
+sigma2 <- sum((z - 4*pi*b1*((b2-x)^2+(b3-y)^2))^2)/n
+
+l1 <- loglike(c(b1,b2,b3),sigma2)
+
+print(c(b1, b2, b3, sigma2, l1))
+```
+<center> *Different starting points* </center> 
+Now, we can pick different starting points based on our data in order to examine any effects they may have on our results.
+```{r}
+znew <- sort(z)
+num <- c(2,3,10,19,20)
+
+for (i in num) {
+  theta2 <- optim(c(x[which(z==znew[i])],y[which(z==znew[i])]), h, method = "BFGS")$par[1]
+  theta3 <- optim(c(x[which(z==znew[i])],y[which(z==znew[i])]), h, method = "BFGS")$par[2]
+
+  theta1 <- sum(z*((theta2-x)^2+(theta3-y)^2))/(4*pi*sum(((theta2-x)^2+(theta3-y)^2)^2))
+  theta4 <- sum((z - 4*pi*theta1*((theta2-x)^2+(theta3-y)^2))^2)/n
+  l <- loglike(c(theta1,theta2,theta3),theta4)
+
+  print(c(theta1, theta2, theta3, theta4, l))
+}
+```
+
+We chose a range of initial points for $(\beta_2,\beta_3)$, based on the inverse intensity observed at its point; more specifically, after sorting the inverse intensity vector $z$, we picked the 2nd, 3rd, 10th, 19th and 20th element (as we have already used the first, i.e. the minimum) to obtain the points at which the power is at its highest, medium and lowest respectively. From the outcome above, we deduce that our results depend on the initial value set. It seems that, when when we choose points where the power is decreased, meaning we stray far from the source, our algorithm likely gets stuck in local minima. We observe that the solutions produced with the last three initial points give a smaller value to our log-likelihood function, as opposed to the previous two, which almost match the value found above.
+
+<center> *Final Results* </center>
+
+We will choose the solution that gives the maximum value to our log-likelihood function:
+```{r}
+theta2 <- optim(c(x[which(z==znew[2])],y[which(z==znew[2])]), h, method = "BFGS")$par[1]
+theta3 <- optim(c(x[which(z==znew[2])],y[which(z==znew[2])]), h, method = "BFGS")$par[2]
+
+theta1 <- sum(z*((theta2-x)^2+(theta3-y)^2))/(4*pi*sum(((theta2-x)^2+(theta3-y)^2)^2))
+theta4 <- sum((z - 4*pi*theta1*((theta2-x)^2+(theta3-y)^2))^2)/n
+a <- loglike(c(theta1,theta2,theta3),theta4)
+
+theta2 <- optim(c(x[which(z==znew[3])],y[which(z==znew[3])]), h, method = "BFGS")$par[1]
+theta3 <- optim(c(x[which(z==znew[3])],y[which(z==znew[3])]), h, method = "BFGS")$par[2]
+
+theta1 <- sum(z*((theta2-x)^2+(theta3-y)^2))/(4*pi*sum(((theta2-x)^2+(theta3-y)^2)^2))
+theta4 <- sum((z - 4*pi*theta1*((theta2-x)^2+(theta3-y)^2))^2)/n
+b <- loglike(c(theta1,theta2,theta3),theta4)
+
+print(a<b)
+```
+Our results are presented below:
+\begin{eqnarray*}
+\hat{\beta_1} &=& 0.001005392\\
+\hat{\beta_2} &=& 103.109\\
+\hat{\beta_3} &=& 56.92348\\
+\hat{\sigma^2} &=& 133816.4
+\end{eqnarray*}
+We observe that, according to the results above, the value of the log-likelihood function is: $l(\hat\theta) = -146.4210$.  
+  
+
+#### Second Solution: Conditional Maximization 
+
+We will first find analytical solutions for $\beta_1, \beta_2, \beta_3$, that maximize our function $g(\beta)$, by considering at each step the rest constant. 
+  
+  
+Step 1. Let us consider $\beta_2, \beta_3$ fixed. Then, if $r_i^2(\beta_2,\beta_3) = (x_i-\beta_2)^2+(y_i-\beta_3)^2$, we have, by differentiation:
+\[
+\frac{\partial g}{\partial \beta_1} = 0 \iff \beta^{\star}_1(\beta_2,\beta_3) = \frac{\sum\limits_{i=1}^n z_ir_i^2(\beta_2,\beta_3)}{4\pi\sum\limits_{i=1}^nr_i^4(\beta_2,\beta_3)} \space \space \space(\star)
+\]  
+  
+  
+Step 2. Now, let us consider $\beta_1, \beta_3$ fixed. Then, 
+\begin{eqnarray*}
+\frac{\partial g}{\partial \beta_2} = 0 
+&\iff&
+\sum\limits_{i=1}^n 2(z_i - 4\pi\beta_1[(x_i-\beta_2)^2 + (y_i-\beta_3)^2])4\pi\beta_12(x_i-\beta_2) = 0 \\
+&\iff& 
+n\beta_2^3 + (-3\sum\limits_{i=1}^nx_i)\beta_2^2 + (\sum\limits_{i=1}^n [3x_i^2-\delta_i])\beta_2 + (\sum\limits_{i=1}^n \delta_ix_i-x_i^3) = 0
+\end{eqnarray*}
+where $\delta_i = \frac{z_i}{4\pi\beta_1} - c_i$and $c_i = (y_i - \beta_3)^2$.
+So, $\hat\beta_2$ is the solution(s) of the above cubic equation, with coefficients dependent on $\beta_1, \beta_3$. 
+
+Step 3. Similarly to Step 2, by considering $\beta_1, \beta_2$ fixed, we get $\beta_3$ by solving the following cubic equation with coefficients dependent on $\beta_1, \beta_2$:
+\[
+\frac{\partial g}{\partial \beta_2} = 0 \iff n\beta_3^3 + (-3\sum\limits_{i=1}^ny_i)\beta_3^2 + (\sum\limits_{i=1}^n [3y_i^2-k_i])\beta_3 + (\sum\limits_{i=1}^n k_iy_i-y_i^3) = 0
+\]
+where $k_i = \frac{z_i}{4\pi\beta_1} - l_i$ and $l_i = (x_i - \beta_2)^2$.
+
+<center> *Algorithmic Implementation using our data* </center>
+Having found analytical solutions for the parameters $\beta_1, \beta_2, \beta_3$, we will now construct a conditional maximization algorithm of the following form:  
+<ul>
+<li>We start at an initial value that we believe is close to the real solution, here: we will choose the position $(\beta_2, \beta_3)$ from our data that gives us the smallest inverse intensity $z$, along with said intensity, that is $\beta_1 = z$</li>
+<li>Then, in the n-th repetition of our algorithm, we update the parameters as follows:  
+1. $\beta_1^{new} = \frac{\sum\limits_{i=1}^n z_ir_i^2(\beta_2^{old},\beta_3^{old})}{4\pi\sum\limits_{i=1}^nr_i^4(\beta_2^{old},\beta_3^{old})}$  
+2. $\beta_2^{new}$ is the solution of the cubic equation in Step 2 above, with updated coefficients dependent on $\beta_1^{new}$ and $\beta_3^{old}$  
+3. $\beta_3^{new}$ is the solution of the cubic equation in Step 2 above, with updated coefficients dependent on $\beta_1^{new}$ and $\beta_2^{new}$
+</li>
+<li> We update our parameters as described above until we reach convergence, i.e. $\max\limits_{\beta_1,\beta_2,\beta_3}|\beta^{new}-\beta^{old}| <\epsilon$, or the maximum amount of iterations is executed. </li>
+</ul>
+  
+Note that $\beta_2^{new}$ and $\beta_3^{new}$ are both found by solving a (different) cubic equation. We know that if all of the coefficients of the cubic equation are real numbers -which is the case- then it has at least one real root. More specifically, if $\Delta = 18abcd -4b^3d+b^2c^2-4ac^3-27a^2d^2$ is the discriminant of the cubic $ax^3 + bx^2 + cx + d$, then:
+<ul>
+<li> If $\Delta > 0$, the cubic has three distinct real roots </li>
+<li> If $\Delta < 0$, the cubic has one real root and two non-real complex conjugate roots </li>
+<li> If $\Delta = 0$, the cubic has a multiple root </li>
+</ul>
+
+Here, we will check whether both equations have only one real root at every step. If that is the case, by discarding any complex roots, we will get only one solution and we can move on to the next step of the algorithm. If it's not the case, our code will reflect that by displaying an appropriate message.  
+  
+
+```{r, warning = F, message = F}
+library(RConics)
+
+initial <- c(z[which(min(z) == z)], x[which(min(z) == z)], y[which(min(z) == z)])
+
+delta <- function(co) {
+  18*co[1]*co[2]*co[3]*co[4] - 4*co[2]^3*co[4] + co[2]^2*co[3]^2 - 4*co[1]*co[3]^3 -27*co[1]^2*co[4]^2
+}
+
+cond_max <- function(b1,b2,b3,maxiter,eps){
+  iter <- 0
+  diff <- 1
+  while((diff>eps) & (iter<maxiter)){
+    b1bef <- b1
+    b2bef <- b2
+    b3bef <- b3
+  
+    
+    b1 <- sum(z*((b2bef-x)^2+(b3bef-y)^2))/(4*pi*sum(((b2bef-x)^2+(b3bef-y)^2)^2))
+    
+    c <- (y-b3bef)^2
+    d <- z/(4*pi*b1) - c
+    fac1 <- c(n, -3*sum(x), 3*sum(x^2)-sum(d), sum(d*x - x^3))
+    roots1 <- cubic(fac1)
+    if (delta(fac1) < -eps) {
+      b2 <- Re(roots1[Im(roots1)==0])
+    } else {
+      print("The discriminant is nonnegative!")
+      b2 <- NaN
+      break
+    }
+    
+    
+    l <- (x-b2)^2
+    k <- z/(4*pi*b1) - l
+    fac2 <- c(n, -3*sum(y), 3*sum(y^2)-sum(k), sum(k*y - y^3))
+    roots2 <- cubic(fac2)
+    if (delta(fac2) < -eps) {
+      b3 <- Re(roots2[Im(roots2)==0])
+    } else {
+      print("The discriminant is nonnegative!")
+      b3 <- NaN
+      break
+    }
+    
+    diff <- max(abs(b1-b1bef),abs(b2-b2bef),abs(b3-b3bef))
+    iter <- iter + 1
+  }
+  return(c(b1,b2,b3,iter))
+} 
+
+res <- cond_max(initial[1], initial[2], initial[3], 100, 1e-5)
+b1 <- res[1]
+b2 <- res[2]
+b3 <- res[3]
+
+sigma2 <- sum((z - 4*pi*b1*((b2-x)^2+(b3-y)^2))^2)/n
+
+l2 <- loglike(c(b1,b2,b3),sigma2)
+
+print(c(b1, b2, b3, sigma2,l2))
+```
+<center> *Different starting points* </center> 
+```{r}
+for (i in 1:20) {
+  resu <- cond_max(znew[i], x[which(z==znew[i])], y[which(z==znew[i])], 100, 1e-5)
+  theta1 <- resu[1]
+  theta2 <- resu[2]
+  theta3 <- resu[3]
+
+  theta4 <- sum((z - 4*pi*theta1*((theta2-x)^2+(theta3-y)^2))^2)/n
+
+  l <- loglike(c(theta1,theta2,theta3),theta4)
+  if (is.nan(theta2)==F && is.nan(theta3)==F) {
+    print(c(theta1, theta2, theta3, theta4, l))
+  }
+}
+```
+We choose a range of initial points for $(\beta_1,\beta_2,\beta_3)$, utilizing all of our data, since we assume that some of the starting points won't produce solutions due to our code being constructed to accommodate only negative discriminants. From the outcome above, we deduce that our results depend on the initial value set, as our assumptions are confirmed. The starting points that do, however, give a solution, all produce the same one.
+
+<center> *Final Results* </center> 
+Our results are presented below:
+\begin{eqnarray*}
+\hat{\beta_1} &=& 0.001005392\\
+\hat{\beta_2} &=& 103.109\\
+\hat{\beta_3} &=& 56.92348\\
+\hat{\sigma^2} &=& 133816.4
+\end{eqnarray*}
+We observe that, according to the results above, the value of the log-likelihood function is: $l(\hat\theta) = -146.4210$.
+
+In the following table, we can see the results obtained from the First and Second Solution and compare them; it is clear that they are identical to a certain decimal point -a good indicator that we may have found the correct solution. It is worth mentioning that both solutions give (approximately) the same value to our log-likelihood function.
+
+|   | $\hat\beta_1$ | $\hat\beta_2$ | $\hat\beta_3$ | $\hat{\sigma^2}$ | $l(\theta)$ |
+|:-:|:-------------:|:-------------:|--------------:|:----------------:|:-----------:|
+|First Solution|  0.001005392 | 103.109 | 56.92348 | 133816.4 | -146.4210|
+|Second Solution| 0.001005392 | 103.109  | 56.92348 | 133816.4 | -146.4210|
+
+
+#### Verification: Newton-Raphson method  
+
+<ul>  
+<li> *Manually*  
+```{r, warning = F, message = F}
+library(base)
+library(pracma)
+
+f <- function(b) {
+  d <- z/(4*pi*b[1]) - (y-b[3])^2
+  k <- z/(4*pi*b[1]) - (x-b[2])^2
+  
+  f1 <- (4*pi*sum(((b[2]-x)^2+(b[3]-y)^2)^2))*b[1] - sum(z*((b[2]-x)^2+(b[3]-y)^2))
+  f2 <- n*b[2]^3 -3*sum(x)*b[2]^2 + (3*sum(x^2)-sum(d))*b[2] + sum(d*x - x^3)
+  f3 <- n*b[3]^3 -3*sum(y)*b[3]^2 + (3*sum(y^2)-sum(k))*b[3] + sum(k*y - y^3)
+  return(c(f1,f2,f3))
+}
+
+newt_raph <- function(b,maxiter,eps){
+  iter <- 0
+  diff <- 1
+  while((diff>eps) & (iter<maxiter)){
+    bold <- b
+    
+    b <- bold + solve(jacobian(f,bold),-f(bold))
+    
+    diff <- max(abs(b - bold))
+    iter <- iter + 1
+  }
+  c(b, iter)
+}
+
+results <- newt_raph(c(0.0001, 100, 50), 100, 1e-5)
+print(results)
+```
+</li>
+<li>*With the help of the "rootSolve" package*  
+```{r, warning = F, message = F}
+library(rootSolve)
+
+model <- function(b){
+  d <- z/(4*pi*b[1]) - (y-b[3])^2
+  k <- z/(4*pi*b[1]) - (x-b[2])^2
+  
+  f1 <- (4*pi*sum(((b[2]-x)^2+(b[3]-y)^2)^2))*b[1] - sum(z*((b[2]-x)^2+(b[3]-y)^2))
+  f2 <- n*b[2]^3 -3*sum(x)*b[2]^2 + (3*sum(x^2)-sum(d))*b[2] + sum(d*x - x^3)
+  f3 <- n*b[3]^3 -3*sum(y)*b[3]^2 + (3*sum(y^2)-sum(k))*b[3] + sum(k*y - y^3)
+  c(F1 = f1, F2 = f2, F3 = f3)
+}
+
+result <- multiroot(f = model, start = c(0.0001, 100, 50))
+print(result)
+```
+</li>
+</ul>
+  
+#### Remarks & Conclusion  
+We observe that the results for $\beta = (\beta_1, \beta_2, \beta_3)$ from the above solutions and the Newton-Raphson method are almost identical. We deduce that the solution $\hat\theta = (\hat\beta_1, \hat\beta_2, \hat\beta_3, \hat{\sigma^2}) = (0.001005392, 103.109, 56.92348, 133816.4)$ is sufficiently close to the source of the nuclear weapons, and soon harmony will be restored.
