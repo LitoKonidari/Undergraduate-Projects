@@ -1,0 +1,1225 @@
+---
+title: 'Bayesian Statistics - project <img src="uoa.png" style="float: left;" height=140px;
+  /> '
+subtitle: "Topic 2021-22: The Normal Model"
+author: Leto Konidari  Petros Antonios Koutsis
+date: "`r format(Sys.Date(), '%d-%m-%Y')`"
+output: html_document
+header-includes:
+  - \usepackage{fontspec}  
+  - \usepackage[english,greek]{babel}
+  - \usepackage{amsmath}
+---
+<!-- 
+install.packages("microbenchmark")
+library(microbenchmark)
+library(xaringan)
+inf_mr()
+-->
+
+<!--
+Κώδικας css
+Δοκιμάστε να προσθέσετε την παρακάτω γραμμή στο .title
+border: solid 1px #000
+-->
+
+<script type="text/x-mathjax-config">
+MathJax.Hub.Config({
+  TeX: { equationNumbers: { autoNumber: "AMS" } }
+});
+</script>
+
+<style type="text/css">
+.title {
+
+    font-size: 40px;
+    font-family: "Times New Roman", Times, serif;
+    font-weight: bold;
+    color: DarkRed;
+    text-align: left;
+
+}
+.subtitle {
+
+    font-size: 25px;
+    font-family: "Times New Roman", Times, serif;
+    font-style: italic;
+    color: DarkRed;
+    text-align: left;
+    margin-top: -3px;
+
+}
+.author {
+
+    font-size: 20px;
+    font-family: "Times New Roman", Times, serif;
+    color: DarkRed;
+    text-align: left;
+
+}
+.date {
+
+    font-size: 16px;
+    font-family: "Times New Roman", Times, serif;
+    color: DarkRed;
+    text-align: left;
+  
+}
+.table {  
+    
+    margin-left: auto;
+    margin-right: auto;
+    width: 50%;
+
+}
+</style>
+
+***
+Let $y=(y_1,y_2,\ldots,y_n)$ be $n$ observations, where
+
+\begin{equation*}
+y_i|\mu,\sigma^2 \sim \mathcal{N}(\mu,\sigma^2), \qquad 1\leq i\leq n,
+\end{equation*}
+
+assumed to be conditionally independent given $\mu$ and $\sigma^2$ and both parameters $\mu$ and $\sigma^2$ are unknown.
+
+##### **EXERCISE 1**
+
+ For each of the following candidate prior distributions for $(\mu,\sigma^2)$ check if they are valid (improper or proper) and determine (if applicable) the corresponding (i) conditional posterior distributions $p(\mu|\sigma^2,y)$
+and $p(\sigma^2|\mu,y)$, (ii) the marginal posterior distributions $p(\mu|y)$
+and $p(\sigma^2|y)$ and (iii) the joint posterior distribution $p(\mu,\sigma^2|y)$:
+
+\begin{eqnarray*}
+p(\mu,\sigma^2) &\stackrel{P1}{\propto}& 1 \\
+p(\mu,\sigma^2) &\stackrel{P2}{\propto}& \frac{1}{\sigma^2}\\
+p(\mu,\sigma^2) & \stackrel{P3}{=}&\textrm{c.p.}\\
+p(\mu,\sigma^2) &\stackrel{P4}{\propto}& J(\mu,\sigma^2),
+\end{eqnarray*}
+
+where c.p. is the conjugate prior for $(\mu,\sigma^2)$ and $J(\mu,\sigma^2)\propto \sqrt{\det I(\mu,\sigma^2)}$ is the Jeffrey's prior. If a statistician has no prior knowledge for both parameters, discuss which of these choices would be reasonable.
+
+
+###################################################################
+###################################################################
+
+
+
+**SOLUTION**
+
+***(P1)*** This distribution is a flat prior, which is improper.
+
+\noindent First, we calculate the joint posterior distribution:
+\[ 
+p(\mu,\sigma^2|y) \propto p(y|\mu,\sigma^2)p(\mu,\sigma^2) \propto p(y|\mu,\sigma^2)\ , \text{so}\  p(\mu,\sigma^2|y) \propto \left(\frac{1}{\sigma^2}\right)^{\frac{n}{2}}e^{-\frac{1}{2\sigma^2}\sum\limits_{i=1}^{n}(y_i -\mu)^2}
+\]
+Now we can determine the marginal posterior distributions as follows:
+\[
+p(\mu|y) \propto \int_{0}^{+\infty} p(\mu,\sigma^2|y)d\sigma^2
+\]
+If $D^2 = \frac{\sum\limits_{i=1}^{n}(y_i - \bar{y})^2}{n+1}$, we can write $\sum\limits_{i=1}^{n}(y_i -\mu)^2 = (n+1)D^2 + n(\mu - \bar{y})^2 = A(\mu)$. Then,  
+\[
+p(\mu|y) \propto \int_{0}^{+\infty}\left(\frac{1}{\sigma^2}\right)^{\frac{n}{2}}e^{-\frac{A(\mu)}{2\sigma^2}}  d\sigma^2
+\]
+and we make the change of variable: $z = \frac{A(\mu)}{2\sigma^2}$. As a result, we get: 
+\[p(\mu|y) \propto (A(\mu))^{-\frac{n}{2}+1}\int_{0}^{+\infty}z^{\frac{n}{2}-2}e^{-z}\,dz
+\]
+We observe that $f(z) = z^{-\frac{n}{2}-2}e^{-z}$ is the p.d.f. of $\Gamma(\frac{n}{2}-1,1)$ for $n > 2$, so we have:
+\[
+p(\mu|y)\propto (A(\mu))^{-\frac{n}{2}+1} = \left(1+\frac{(\mu-\bar{y})^2}{(n+1)\frac{D^2}{n}}\right)^{-\frac{n+1+1}{2}}\ , \text{so}\ \mu|y \sim t_{n+1}\left(\bar{y}, \frac{D^2}{n}\right).
+\]
+Similarly, we will determine the marginal distribution:
+\begin{eqnarray*}
+p(\sigma^2|y) 
+&=& 
+\int_{-\infty}^{+\infty} p(\mu,\sigma^2|y)d\mu \\
+&=& 
+\int_{-\infty}^{+\infty} \left( \frac{1}{\sigma^2} \right)^{\frac{n}{2}}e^{-\frac{(n+1)D^2 + n(\bar{y} - \mu)^2}{2\sigma^2}} \\
+&=&
+\left( \frac{1}{\sigma^2} \right )^{\frac{n}{2}}e^{-\frac{(n+1)D^2}{2\sigma^2}} \left( \frac{1}{\sigma^2} \right)^{-\frac{1}{2}} \int_{-\infty}^{+\infty} \left( \frac{1}{\sigma^2} \right)^{\frac{1}{2}}e^{-\frac{(\mu - \bar{y})^2}{2\frac{\sigma^2}{n}}}.
+\end{eqnarray*}
+We observe that:
+\[
+f(\mu) = \left( \frac{1}{\sigma^2} \right)^{\frac{1}{2}}e^{-\frac{(\mu - \bar{y})^2}{2\frac{\sigma^2}{n}}}
+\] is the p.d.f. of $\mathcal{N} \left( \bar{y}, \frac{\sigma^2}{n} \right)$, so we have:
+\[
+p(\sigma^2|y) \propto \left( \frac{1}{\sigma^2} \right)^{\frac{n-1}{2}}e^{-\frac{(n+1)D^2}{2\sigma^2}}
+\]
+so $\sigma^2|y \sim \text{Inv-}\chi^2 \left( \frac{n-3}{2}, \frac{\sum\limits_{i=1}^{n}(y_i-\bar{y})^2}{n+3} \right)$ for $n > 3$ and $\sigma^2 > 0$.
+
+Now we are ready to calculate the conditional posterior distributions. Let's start with
+\begin{eqnarray*}
+p(\mu|\sigma^2,y) 
+&\propto&
+\frac{p(\mu,\sigma^2)p(y|\mu,\sigma^2)}{p(\sigma^2|y)}\\
+&\propto& 
+\frac{ \left(\frac{1}{\sigma^2} \right)^{ \frac{n}{2} }e^{-\frac{(n+1)D^2+n(\-\bar{y})^2}{2\sigma^2}}}{ \left( \frac{1}{\sigma^2} \right)^{ \frac{n-1}{2} }e^{-\frac{(n+1)D^2}{2\sigma^2}}}\\ 
+&\propto& 
+{ \left( \frac{1}{\sigma^2} \right)^{\frac{1}{2}}e^{-\frac{(\mu - \bar{y})^2}{2\frac{\sigma^2}{n}}}}
+\end{eqnarray*} 
+
+so $\mu|\sigma^2,y \sim \mathcal{N}(\bar{y}, \frac{\sigma^2}{n})$. 
+Similarly, 
+
+\begin{eqnarray*}
+p(\sigma^2|\mu,y) 
+&\propto&
+\frac{p(\mu,\sigma^2)p(y|\mu,\sigma^2)}{p(\mu|y)}\\
+&\propto&
+\frac{ \left( \frac{1}{\sigma^2} \right)^{ \frac{n}{2}}e^{-\frac{(n+1)D^2+n(\mu -\bar{y})^2}{ 2\sigma^2}}}{(n+1)D^2+n(\bar{y}-\mu)^2}\\
+&\propto&
+\left(\frac{1}{\sigma^2}\right)^{\frac{n}{2}}e^{-\frac{(n+1)D^2+n(\mu -\bar{y})^2}{ 2\sigma^2}}
+\end{eqnarray*} 
+
+so $\sigma^2|\mu,y \sim \text{Inv-G}\left( \frac{n}{2}-1,\frac{(n+1)D^2+n(\mu -\bar{y})^2}{2} \right) \text{ for } n>2 \text{ and } \sigma^2>0$.
+
+
+***(P2)*** This distribution is improper, as $\int_{0}^{+\infty} \frac{1}{\sigma^2}\, d\sigma^2 = \infty$. From the notes, we have proved the following:
+\[
+p(\mu,\sigma^2|y) \propto \left(\frac{1}{\sigma^2}\right)^{\frac{n}{2}+1}e^{-\frac{1}{2\sigma^2}((n-1)s^2+n(\bar{y}-\mu)^2)}
+\]
+$\sigma^2|y \sim \text{Inv-}\chi^2(n-1,s^2)\text{, }\mu|y \sim t_{n-1} \left(\bar{y}, \frac{s^2}{n}\right)\text{.}$
+
+Let's determine the conditional posterior distributions:
+\[
+p(\mu|\sigma^2,y) 
+\propto 
+\frac{\frac{1}{\sigma^2}(\frac{1}{\sigma^2})^{\frac{n}{2}}e^{-\frac{(n-1)s^2+n(\mu-\bar{y})^2}{2\sigma^2}}}{\left(\frac{1}{\sigma^2}\right)^{\frac{n+1}{2}}e^{-\frac{(n-1)s^2}{2\sigma^2}}} 
+\propto 
+\left( \frac{1}{\sigma^2} \right)^{\frac{1}{2}}e^{-\frac{(\mu - \bar{y})^2}{2\frac{\sigma^2}{n}}}
+\] so $\mu|\sigma^2,y \sim \mathcal{N}(\bar{y},\frac{\sigma^2}{n})$. Also,
+\[
+p(\sigma^2|\mu,y)
+\propto \frac{\frac{1}{\sigma^2}(\frac{1}{\sigma^2})^{\frac{n}{2}}e^{-\frac{(n-1)s^2+n(\mu -\bar{y})^2}{2\sigma^2}}}{(n-1)s^2+n(\bar{y}-\mu)^2} \propto \left( \frac{1}{\sigma^2} \right)^{\frac{n}{2}+1}e^{-\frac{(n-1)s^2+n(\mu -\bar{y})^2}{2\sigma^2}}
+\]
+so
+\[
+\sigma^2|\mu,y \sim \text{Inv-G}\left(\frac{n}{2},\frac{(n-1)s^2+n(\mu -\bar{y})^2}{2}\right) \text{ for } \sigma^2>0\text{.}
+\]
+or
+\[
+\sigma^2|\mu,y \sim \text{Inv-}\chi^2\left(n,\left(1-\frac{1}{n}\right)s^2+(\mu-\bar{y})^2\right)\text{.}
+\]
+
+
+***(P3)*** According to Bayesian Data Analysis (pg. 77), the conjugate prior distribution for $(\mu,\sigma^2)$, having specified that $\mu|\sigma^2 \sim \mathcal{N}(\mu_0, \frac{\sigma^2}{\kappa_0})$ and $\sigma^2 \sim \text{Inv}-\chi^2(\nu_0,\sigma^2_0)$, is $\text{N-Inv-}\chi^2(\mu,\sigma^2|\mu_0,\sigma^2_0/\kappa_0;\nu_0,\sigma^2_0)$ (which is a proper prior). As a result, we have the following posterior density:
+\begin{eqnarray*}
+p(\mu,\sigma^2|y) 
+&\propto&
+\left(\frac{1}{\sigma^2}\right)^{\frac{\nu_0+1}{2}+1}exp\left(-\frac{1}{2\sigma^2}[\nu_0\sigma_0^2+\kappa_0(\mu-\mu_0)^2\right) \times \left(\frac{1}{\sigma^2}\right)^{\frac{n}{2}}exp\left(-\frac{1}{2\sigma^2}[(n-1)s^2+n(\bar{y}-\mu)^2]\right)  
+\end{eqnarray*}
+
+So, the posterior follows $\text{N-Inv-}\chi^2(\mu,\sigma^2|\mu_n,\sigma^2_n/\kappa_n;\nu_n.\sigma^2_n)$, where
+\[
+\mu_n = \frac{\kappa_0}{\kappa_0+n}\mu_0+\frac{n}{\kappa_0+n}\bar{y}
+\]
+\[
+\kappa_n = \kappa_0+n
+\]
+\[
+\nu_n=\nu_0+n
+\]
+\[
+\nu_n\sigma^2_n = \nu_0\sigma^2_0+(n-1)s^2+\frac{\kappa_0n}{\kappa_0+n}(\bar{y}-\mu_0)^2
+\]
+The conditional posterior density of $\mu$, given $\sigma^2$, is proportional to the joint posterior density with $\sigma^2$ held constant,
+\[
+\mu|\sigma^2,y \sim \mathcal{N}(\mu_n,\sigma^2_n/\kappa_n)\text{.}
+\]
+The marginal posterior density of $\sigma^2$:
+\[
+\sigma^2|y \sim \text{Inv-}\chi^2(\nu_n,\sigma^2_n)\text{.}
+\]
+Now we will calculate the remaining distributions. Let's start with the marginal posterior density of $\mu$:
+\[
+p(\mu|y) \propto \int_{0}^{+\infty}\left(\frac{1}{\sigma^2}\right)^{\frac{\nu_n+1}{2}+1}e^{-\frac{1}{2\sigma^2}A(\mu)}d\sigma^2\text{,}
+\]
+where $A(\mu) = \nu_n\sigma^2_n+\kappa_n(\mu_n-\mu)^2$. We make the change of variable $z = \frac{A(\mu)}{2\sigma^2}$ and we have:
+\[
+p(\mu|y) \propto A(\mu)^{-\frac{\nu_n+1}{2}}\int_{0}^{+\infty}z^{\frac{\nu_n+1}{2}-1}e^{-z}dz\text{,}
+\]
+but $f(z) = z^{\frac{\nu_n+1}{2}-1}e^{-z}$ is the p.d.f. of $\Gamma\left(\frac{\nu_n+1}{2},1\right)$, so finally we get:
+\[
+p(\mu|y) \propto (A(\mu))^{-\frac{\nu_n+1}{2}} = \left(1+\frac{(\mu_n-\mu)^2}{\nu_n\frac{\sigma^2_n}{\kappa_n}}\right)^{-\frac{\nu_n+1}{2}}\text{,}
+\]
+so $\mu|y \sim t_{\nu_n}\left(\mu_n,\frac{\sigma^2_n}{\kappa_n}\right)$.
+The conditional posterior density of $\sigma^2$, given $\mu$, is proportional to the joint posterior density with $\mu$ held constant, so:
+\[
+\sigma^2|\mu,y \sim \text{ Inv-G}\left(\frac{\nu_0+n+1}{2},\frac{\nu_0\sigma^2_0+\kappa_0(\mu-\mu_0)^2+(n-1)s^2+n(\bar{y}-\mu)^2}{2}\right)\text{.}
+\]
+
+
+***(P4)*** The likelihood of our model is
+\begin{eqnarray*}
+L(\mu,\sigma^2) &=& \prod_{i=1}^n f(y_i|\theta) \\
+&\propto& \left(\frac{1}{\sigma^2}\right)^{\frac{n}{2}}e^{-\frac{1}{2\sigma^2}\sum\limits_{i=1}^{n}(y_i -\mu)^2} \\
+&=& 
+\left(\frac{1}{\sigma^2}\right)^{\frac{n}{2}}e^{ -\frac{1}{2\sigma^2} \left(\sum\limits_{i=1}^{n}(y_i -\bar{y})^2 + n( \bar{y}-\mu )^2 \right)}\\
+&=&
+\left(\frac{1}{\sigma^2}\right)^{\frac{n}{2}}e^{ -\frac{1}{2\sigma^2} \left( (n-1)s^2 + n( \bar{y}-\mu )^2 \right)}
+\end{eqnarray*}
+
+
+\noindent Hence log likelihood is
+\[
+\ell(\theta) = \log L(x;\theta) \propto -\frac{n}{2} \log(\sigma^2)  -\frac{1}{2\sigma^2} \left( (n-1)s^2 + n( \bar{y}-\mu )^2 \right)
+\]
+For the first derivatives we have:
+\[
+\nabla \ell(\theta) = \left( \frac{ n( \bar{y} - \mu ) }{2\sigma^2} , - \frac{n}{2\sigma^2} + \frac{1}{\sigma^3} \left( (n-1)s^2 + n( \bar{y}-\mu )^2 \right) \right)
+\]
+For the second-order derivatives of $\ell(\theta)$ we have:
+
+\begin{eqnarray*}
+    \frac{\partial^2 }{\partial \mu^2}\ell(\theta) &=& -\frac{n}{\sigma^2}\\
+    \frac{\partial^2 }{\partial \mu \partial \sigma}\ell(\theta) &=& -\frac{n(\bar{y}-\mu)}{\sigma^4}\\
+    \frac{\partial^2 }{\partial \sigma \partial \mu}\ell(\theta) &=& -\frac{n(\bar{y}-\mu)}{\sigma^4}\\
+    \frac{\partial^2 }{\partial \sigma^2}\ell(\theta) &=& 
+    \frac{1}{2\sigma^4} - \frac{1}{\sigma^6} \left( (n-1)s^2 + n( \bar{y}-\mu )^2 \right) 
+\end{eqnarray*}
+
+
+\noindent Now, we can compute the Fisher Information Matrix 
+\begin{center}
+$I(\theta) = 
+    \mathbb{E} \left( \nabla \ell(\theta) (\nabla \ell(\theta))^T \right) =
+    -\mathbb{E}$
+    $\begin{pmatrix}
+    \frac{\partial^2 }{\partial \mu^2}\ell(\theta) & 
+    \frac{\partial^2 }{\partial \mu \partial \sigma}\ell(\theta)\\
+    \frac{\partial^2 }{\partial \sigma \partial \mu}\ell(\theta) & \frac{\partial^2 }{\partial \sigma^2}\ell(\theta)
+    \end{pmatrix}
+    $
+\end{center}
+
+[ $y\sim \mathcal{N}(\mu,\sigma^2) \Rightarrow \bar{y} \sim \mathcal{N}(\mu,\sigma^2/n)\ \&\ \frac{1}{\sigma^2} \sum_{i=1}^n (y_i-\bar{y})^2 \sim \chi^2_{n-1}$ ]
+
+\[
+    I(\theta) =
+    \begin{pmatrix} 
+    n/\sigma^2 & 0 \\ 0 & n/(2\sigma^4)
+    \end{pmatrix}
+\]
+$p(\mu,\sigma^2) \overset{P4}{\propto} J(\mu,\sigma^2) = \sqrt{det(I)}=\sqrt{det\begin{pmatrix}n/\sigma^2 & 0 \\ 0 & n/(2\sigma^4)\end{pmatrix}}=\sqrt{\frac{n}{2\sigma^6}}\propto\frac{1}{\sigma^3}.$
+
+
+\noindent This prior is improper since $\int_{0}^{+\infty} \frac{1}{\sigma^3}\, d\sigma^2 = \infty$.
+
+
+\noindent The joint posterior distribution is given by:
+\begin{eqnarray*}
+p(\mu,\sigma^2|y) 
+&\propto&
+p(y|\mu,\sigma^2)p(\mu,\sigma^2) \\
+&\propto&
+\left(\frac{1}{\sigma^2}\right)^{\frac{3}{2}} \left(\frac{1}{\sigma^2}\right)^{\frac{n}{2}}e^{-\frac{1}{2\sigma^2}\sum\limits_{i=1}^{n}(y_i -\mu)^2}\\
+&=& 
+\left(\frac{1}{\sigma^2}\right)^{\frac{n+1}{2}+1}e^{ -\frac{1}{2\sigma^2} \left(\sum\limits_{i=1}^{n}(y_i -\bar{y})^2 + n( \bar{y}-\mu )^2 \right)}\\
+&=&
+\left(\frac{1}{\sigma^2}\right)^{\frac{n+1}{2}+1}e^{ -\frac{1}{2\sigma^2} \left( (n-1)s^2 + n( \bar{y}-\mu )^2 \right)}
+\end{eqnarray*}
+
+
+\noindent Now we can determine the marginal posterior distributions as follows:
+\begin{eqnarray*}
+p(\sigma^2|y) &\propto& \int_{-\infty}^{+\infty} p(\mu,\sigma^2|y)\, d\mu\\
+&\propto& 
+\int_{-\infty}^{+\infty} \left(\frac{1}{\sigma^2}\right)^{\frac{n+1}{2}+1}e^{ -\frac{1}{2\sigma^2} \left( (n-1)s^2 + n( \bar{y}-\mu )^2 \right)}\, d\mu\\
+&\propto&
+\int_{-\infty}^{+\infty} \left(\frac{1}{\sigma^2}\right)^{\frac{n+1}{2}+1}e^{ -\frac{1}{2\sigma^2} \left( \sum_{i=1}^n (y_i-\bar{y})^2 + n( \bar{y}-\mu )^2 \right)}\, d\mu\\
+&\propto&
+\left(\frac{1}{\sigma^2}\right)^{\frac{n+1}{2}+1}  e^{ -\frac{1}{2\sigma^2}  \sum_{i=1}^n (y_i-\bar{y})^2 } \int_{-\infty}^{+\infty} e^{ -n( \bar{y}-\mu )^2 }\, d\mu\\
+&\propto&
+\left(\frac{1}{\sigma^2}\right)^{\frac{n+1}{2}+1}  e^{ -\frac{1}{2\sigma^2}  \sum_{i=1}^n (y_i-\bar{y})^2 } \left[ \frac{ \sigma \sqrt{2\pi} }{\sqrt{n}} \right]\\
+&\propto&
+\left(\frac{1}{\sigma^2}\right)^{\frac{n}{2}+1} e^{ -\frac{1}{2\sigma^2}  \sum_{i=1}^n (y_i-\bar{y})^2 }\\
+&\propto& \text{Inv-}\chi^2 \left( n,\frac{ \sum_{i=1}^n (y_i-\bar{y})^2}{n} \right)
+\end{eqnarray*}
+
+
+and
+
+\begin{eqnarray*}
+p(\mu|y) &\propto& \int_{0}^{+\infty} p(\mu,\sigma^2|y)\, d\sigma^2\\
+&\propto& 
+\int_{0}^{+\infty} \left(\frac{1}{\sigma^2}\right)^{\frac{n+1}{2}+1}e^{ -\frac{1}{2\sigma^2} \left( (n-1)s^2 + n( \bar{y}-\mu )^2 \right)}\, d\sigma^2\\
+\end{eqnarray*}
+
+Let $A(\mu) = \sum_{i=1}^n (y_i-\bar{y})^2 + n(\bar{y}-\mu)$ and $z = \frac{A(\mu)}{2\sigma^2}$. We have $\frac{d\sigma^2}{dz} = -\frac{A(\mu)}{2}z^{-2}$.
+
+
+\begin{eqnarray*}
+p(\mu|y) &\propto& 
+\int_{0}^{+\infty} \left(\frac{1}{\sigma^2}\right)^{\frac{n+1}{2}+1}e^{ -\frac{A}{2\sigma^2} }\, d\sigma^2\\
+&\propto&
+-\frac{A}{2} \int_{0}^{+\infty} \left( \frac{A}{2z} \right)^{-\left(\frac{n+1}{2}+1\right)} e^{-z}z^{-2}\, dz\\
+&\propto&
+A^{ -\frac{n+1}{2} } \int_{0}^{+\infty} z^{\frac{n+1}{2}-1} e^{-z}\, dz\\
+&\propto&
+A^{ -\frac{n+1}{2} }\\
+&=&
+\left[ \sum_{i=1}^n (y_i-\bar{y})^2 + n(\bar{y}-\mu) \right]^{ -\frac{n+1}{2} }\\
+&\propto&
+\left[ 1 + \frac{n}{\sum_{i=1}^n (y_i-\bar{y})^2} (\bar{y}-\mu)^2  \right]^{ -\frac{n+1}{2} }\\
+&=&
+t_n \left( \bar{y},  \frac{\sum_{i=1}^n (y_i-\bar{y})^2}{n^2} \ \right)
+\end{eqnarray*}
+
+
+\noindent Now we are ready to calculate the conditional posterior distributions. Let's start with
+\begin{eqnarray*}
+p(\mu|\sigma^2,y) 
+&\propto&
+\frac{p(\mu,\sigma^2)p(y|\mu,\sigma^2)}{p(\sigma^2|y)}\\
+&\propto& 
+\frac{ \left(\frac{1}{\sigma^2} \right)^{ \frac{3}{2} }\left(\frac{1}{\sigma^2} \right)^{ \frac{n}{2} }e^{-\frac{(n-1)s^2 + n( \bar{y}-\mu )^2}{2\sigma^2}}}{\left(\frac{1}{\sigma^2}\right)^{\frac{n}{2}+1} e^{ -\frac{1}{2\sigma^2}  \sum_{i=1}^n (y_i-\bar{y})^2 }}\\ 
+&\propto& 
+{ \left( \frac{1}{\sigma^2} \right)^{\frac{1}{2}}e^{-\frac{(\mu - \bar{y})^2}{2\frac{\sum_{i=1}^n (y_i-\bar{y})^2}{n^2}}}}
+\end{eqnarray*} 
+
+so $\mu|\sigma^2,y \sim \mathcal{N}\left( \bar{y},  \frac{\sum_{i=1}^n (y_i-\bar{y})^2}{n^2} \right)$. 
+
+\noindent The conditional posterior density of $\sigma^2$, given $\mu$, is proportional to the joint posterior density with $\mu$ held constant, so $\sigma^2|\mu,y \sim \text{Inv-G}\left( \frac{n+1}{2},\frac{(n-1)s^2+n(\mu -\bar{y})^2}{2} \right)$.
+
+
+##### *Choosing a prior for our problem* #####
+\noindent The absence of prior knowledge renders the choice of the conjugate prior (P3) not appealing; that's because, in the case of this informative prior, we cannot determine the -particular for our problem-values of its parameters, without prior knowledge or strong beliefs about what our parameters should be.  
+Regarding the remaining choices, using any of them seems reasonable, since they are all uninformative, so we will now analyze the advantages and disadvantages of each one.  
+Both the "naive" flat prior (P1) and (P2) lead to faster and easier for us calculations. At first glance, the flat prior seems to better reflect the fact that we have no prior knowledge, but that is not necessarily the case. In the first case, we take $\sigma^2 \sim U(0,1)$, and in the second $log\sigma \sim U(0,1)$, so they both represent ignorance in the same manner, through the Uniform distribution. We can think of it this way: the intervals (0,1) and (0,$+\infty$) have the same cardinality, as the function $x \mapsto log(x)$ is an isomorphism. We deduce that the two choices are mathematically equivalent.  
+However, from a statistical viewpoint, the prior (P1) has some downfalls in contrast to (P2). For example, we cannot adopt it for a sample size smaller than 4, since the posterior distribution will then be invalid, and the sample size is usually a-priori unknown.  
+Furthermore, (P2) is invariant concerning location and scale changes, i.e. the change of location and/or of scale will not impact our modelling. As a result, it's safer to choose the prior (P2) out of the two.  
+Contrary to (P1) and (P2), (P4) or Jeffrey's prior may be, computationally, more demanding but its invariance, under reparameterization, property may be useful, depending on our next steps in the analysis process.  
+In conclusion,  we could say that (P2) and (P4) seem to be the more suitable choices; from there, the final decision should be made concerning the particularity of the problem. 
+
+###################################################################
+###################################################################
+
+
+
+
+
+##### **EXERCISE 2**
+Let us assume that $n=9$, $\overline{y}= 0$ and$s=\sqrt{s^2}=3$, where $s^2$ is the unbiased sample variance. Then, verify that under prior P2
+$\mu|y \sim t_8$, where $t_n$ is the student distribution with $n$ degrees of freedom and draw a graph of its density function for $n=8$ together with a histogram of a simulated sample of size $M=5000$.   
+
+
+**SOLUTION**
+
+```{r}
+n <- 9
+ybar <- 0
+s <- 3
+
+set.seed(123)
+sample <- ybar+(s/sqrt(n))*rt(5000,df = n-1)
+hist(sample, main = "Histogram of simulated sample from the marginal distribution 
+     of the mean along with its density function", prob = T, xlim = c(-5,5), 
+     ylim = c(0,0.45), col = "skyblue", border = "deepskyblue3", breaks = 50, xlab = "mu", ylab = "p(mu|y)")
+curve(ybar+(s/sqrt(n))*dt(x,n-1), from = -5, to = 5,col = "lightslateblue", lwd = 2,
+     add = TRUE)
+```
+
+
+###################################################################
+###################################################################
+
+
+
+##### **EXERCISE 3**
+
+
+Reparameterization of the normal model by selecting the precision parameter $\tau=1/\sigma^2$, instead of the variance parameter is a very popular choice. Determine all the prior distributions corresponding to $(\mu,\tau)$, when $(\mu,\sigma^2)$ is selected according to P1-P4, as indicated in Exercise 1 and answer all the questions of Exercise 1, now for $(\mu,\tau)$. 
+
+**SOLUTION**  
+\noindent First, we proceed to the calculation of the "new" prior distributions in the light of the reparameterization we have implemented. We have the transformation
+\[
+(\mu,\sigma^2) = \left(\mu,\frac{1}{\tau}\right) = (g^{-1}_{1}(\mu,\tau),g^{-1}_{2}(\mu,\tau)) = g^{-1}(\mu,\tau)
+\]
+and know that if $p(\mu,\sigma^2)$ is a function of the vector $(\mu,\sigma^2)$ then the corresponding, under the reparameterization, function of the vector $(\mu,\tau)$ is given by
+\[
+p(\mu,\tau) = p(g^{-1}(\mu,\tau))\begin{vmatrix}
+\frac{\partial g^{-1}_1}{\partial \mu}(\mu,\tau) & \frac{\partial g^{-1}_1}{\partial \tau}(\mu,\tau) \\
+\frac{\partial g^{-1}_2}{\partial \mu}(\mu,\tau) & \frac{\partial g^{-1}_2}{\partial \tau}(\mu,\tau)
+\end{vmatrix}= p(g^{-1}(\mu,\tau))
+\begin{vmatrix}
+1 & 0\\
+0 & -\frac{1}{\tau^2}
+\end{vmatrix} \propto 
+p(g^{-1}(\mu,\tau))\tau^{-2}\text{.}
+\]
+Now, for the priors $(P1),(P2)$ and $(P4)$ we have $p(g^{-1}(\mu,\tau)) =1$, $p(g^{-1}(\mu,\tau)) =\tau$ and $p(g^{-1}(\mu,\tau)) =\tau^{-\frac{3}{2}}$ respectively. Regarding the cοnjugate prior (P3) we will get the prior through: $p(\mu,\tau) = p(\mu|\tau)p(\tau)$.  
+
+
+\noindent We know that $\mu|\sigma^2 \sim \mathcal{N}(\mu_0,\frac{\sigma^2}{\kappa_0})$, so $\mu|\tau \sim \mathcal{N}(\mu_0,\frac{1}{\kappa_0\tau})$. Now, we need to optain $p(\tau)$. We know that $\sigma^2 \sim \text{Inv-}\chi^2(\nu_0,\sigma^2_0)$ and $\tau = g(\sigma^2)=\frac{1}{\sigma^2}$, so $g^{-1}(\tau) = \frac{1}{\tau}$. As a result,
+\[
+p(\tau) = p_{\sigma^2}(g^{-1}(\tau))\left|\frac{dg^{-1}(\tau)}{d\tau}\right| \propto p_{\sigma^2}\left(\frac{1}{\tau}\right)\tau^{-2} \propto \tau^{\frac{\nu_0}{2}-1}e^{-\frac{\nu_0\sigma^2_0}{2}\tau}\text{,}
+\]
+so we deduce that $\tau \sim \text{G}\left(\frac{\nu_0}{2},\frac{\nu_0\sigma^2_0}{2}\right)$ and we are ready to find the prior:
+\[
+p(\mu,\tau) \propto \tau^{\frac{1}{2}}e^{\frac{(\mu-\mu_0)^2}{2}\kappa_0\tau}\tau^{\frac{\nu_0}{2}-1}e^{-\frac{\nu_0\sigma^2_0}{2}\tau} = \tau^{\frac{\nu_0+1}{2}-1}e^{-\frac{\nu_0\sigma^2_0+\kappa_0(\mu-\mu_0)^2}{2}\tau}\text{.}
+\]
+
+\noindent The prior distributions, under the reparameterization, are
+\begin{eqnarray*}
+p(\mu,\tau) &\overset{P1}{\propto}& \tau^{-2}\\
+p(\mu,\tau) &\overset{P2}{\propto}& \tau^{-1}  \\
+p(\mu,\tau) &\overset{P3}{=}& \tau^{\frac{\nu_0+1}{2}-1} e^{-\frac{\nu_0\sigma^2_0+\kappa_0(\mu-\mu_0)^2}{2}\tau}\\
+p(\mu,\tau) &\overset{P4}{\propto}& \tau^{-\frac{1}{2}}
+\end{eqnarray*}
+
+
+ \noindent We know that $y_i \sim \mathcal{N}(\mu, \frac{1}{\tau}), 1\leq i \leq n$.
+
+
+\noindent (P1) Now, let's find the joint posterior distribution:
+\begin{eqnarray*}
+p(\mu,\tau|y) 
+&\propto& p(\mu,\tau)p(y|\mu,\tau)\\
+&\propto&
+\tau^{\frac{n-3+1}{2}-1}e^{-\frac{(n-1)s^2+n(\bar{y}-\mu)^2}{2}\tau}
+\end{eqnarray*}
+So, $p(\mu,\tau|y) \sim \text{Normal-Gamma}\left(\bar{y},n,\frac{n-3}{2},\frac{2(n-1)s^2}{2}\right)$
+
+\noindent For the marginal posterior distributions we have:
+\[
+p(\mu|y) = \int_{0}^{+\infty}p(\mu,\tau|y)d\tau \propto \int_{0}^{+\infty}\tau^{\frac{n-3+1}{2}-1}e^{-\frac{(n-1)s^2+n(\bar{y}-\mu)^2}{2}\tau}d\tau\text{.}
+\]
+Let $A(\mu) = \frac{n(n-3)M_2}{n-3}+n(\bar{y}-\mu)^2$ and the change of variable $z=\frac{A(\mu)}{2}\tau$:
+\begin{eqnarray*}
+p(\mu|y) 
+&\propto& 
+A(\mu)^{-\frac{n-3+1}{2}}\int_{0}^{+\infty}z^{\frac{n-3+1}{2}-1}e^{-z}dz\\ &\propto&  A(\mu)^{-\frac{n-3+1}{2}} = \left(1+\frac{(\bar{y}-\mu)^2}{\frac{(n-3)M_2}{n-3}}\right)^{-\frac{n-3+1}{2}}\text{,}
+\end{eqnarray*}
+so $\mu|y \sim t_{n-3}(\bar{y},\frac{M_2}{n-3})$. For the marginal posterior of $\tau|y$:
+
+\noindent 
+\begin{eqnarray*}
+p(\tau|y) 
+&=& \int_{-\infty}^{+\infty}p(\mu,\tau|y)d\mu \propto \tau^{\frac{n-3+1}{2}-1}e^{-\frac{n(n-3)s^2}{2}\tau}\int_{-\infty}^{+\infty}e^{\frac{n(\bar{y}-\mu)^2}{2}\tau}\\
+&\propto& \tau^{\frac{n-3+1}{2}-1}e^{-\frac{n(n-3)s^2}{2}\tau}(n\tau)^{-\frac{1}{2}}\propto \tau^{\frac{n-3}{2}-1}e^{-\frac{n(n-3)s^2}{2}\tau}\text{,}
+\end{eqnarray*}
+so $\tau|y \sim \text{G}\left(\frac{n-3}{2},\frac{(n-1)s^2}{2}\right)$.
+
+\noindent The conditional posterior density of $\mu$, given $\tau$, is proportional to the joint posterior density
+with $\tau$ held constant, so we have
+\[
+\mu|\tau,y \sim \mathcal{N}\left(\bar{y},\frac{1}{n\tau}\right)\text{.}
+\]
+Similarly, the conditional posterior density of $\tau$, given $\mu$, is proportional to the joint posterior density with $\mu$ held constant, so:
+\[
+\tau|\mu,y \sim \text{G}\left(\frac{(n-3)n}{2},\frac{(n-1)s^2+n(\bar{y}-\mu)^2}{2}\right)\text{.}
+\]
+
+
+\noindent (P2) Let's find the joint posterior distribution:
+\begin{eqnarray*}
+p(\mu,\tau|y) 
+&\propto& p(\mu,\tau)p(y|\mu,\tau)\\
+&\propto&
+\tau^{\frac{n-1+1}{2}-1}e^{-\frac{(n-1)s^2+n(\bar{y}-\mu)^2}{2}\tau}
+\end{eqnarray*}
+So, $p(\mu,\tau|y) \sim \text{Normal-Gamma}\left(\bar{y},n,\frac{n-1}{2},\frac{2(n-1)s^2}{2}\right)$
+
+\noindent For the marginal posterior distributions we have:
+\[
+p(\mu|y) = \int_{0}^{+\infty}p(\mu,\tau|y)d\tau \propto \int_{0}^{+\infty}\tau^{\frac{n-1+1}{2}-1}e^{-\frac{(n-1)s^2+n(\bar{y}-\mu)^2}{2}\tau}d\tau\text{.}
+\]
+Let $A(\mu) = \frac{n(n-1)M_2}{n-3}+n(\bar{y}-\mu)^2$ and the change of variable $z=\frac{A(\mu)}{2}\tau$:
+\begin{eqnarray*}
+p(\mu|y) 
+&\propto& 
+A(\mu)^{-\frac{n-1+1}{2}}\int_{0}^{+\infty}z^{\frac{n-1+1}{2}-1}e^{-z}dz\\ &\propto&  A(\mu)^{-\frac{n-1+1}{2}} = \left(1+\frac{(\bar{y}-\mu)^2}{\frac{(n-1)M_2}{n-1}}\right)^{-\frac{n-1+1}{2}}\text{,}
+\end{eqnarray*}
+so $\mu|y \sim t_{n-1}(\bar{y},\frac{M_2}{n-1})$. For the marginal posterior of $\tau|y$:
+
+\noindent 
+\begin{eqnarray*}
+p(\tau|y) 
+&=& \int_{-\infty}^{+\infty}p(\mu,\tau|y)d\mu \propto \tau^{\frac{n-1+1}{2}-1}e^{-\frac{n(n-1)s^2}{2}\tau}\int_{-\infty}^{+\infty}e^{\frac{n(\bar{y}-\mu)^2}{2}\tau}\\
+&\propto& \tau^{\frac{n-1+1}{2}-1}e^{-\frac{n(n-1)s^2}{2}\tau}(n\tau)^{-\frac{1}{2}}\propto \tau^{\frac{n-1}{2}-1}e^{-\frac{n(n-1)s^2}{2}\tau}\text{,}
+\end{eqnarray*}
+so $\tau|y \sim \text{G}\left(\frac{n-1}{2},\frac{(n-1)s^2}{2}\right)$.
+
+\noindent The conditional posterior density of $\mu$, given $\tau$, is proportional to the joint posterior density
+with $\tau$ held constant, so we have
+\[
+\mu|\tau,y \sim \mathcal{N}\left(\bar{y},\frac{1}{n\tau}\right)\text{.}
+\]
+Similarly, the conditional posterior density of $\tau$, given $\mu$, is proportional to the joint posterior density with $\mu$ held constant, so:
+\[
+\tau|\mu,y \sim \text{G}\left(\frac{n-1}{2},\frac{(n-1)s^2+n(\bar{y}-\mu)^2}{2}\right)\text{.}
+\]
+
+
+\noindent (P3) As previously mentioned, here we have that $p(\mu,\tau) \propto \tau^{\frac{\nu_0+1}{2}-1} e^{-\frac{\nu_0\sigma^2_0+\kappa_0(\mu-\mu_0)^2}{2}\tau}$. Now, let's find the joint posterior distribution:
+\begin{eqnarray*}
+p(\mu.\tau|y) 
+&\propto& p(\mu,\tau)p(y|\mu,\tau)\\
+&\propto&
+\tau^{\frac{\nu_0+n+1}{2}-1}e^{-\frac{\nu_0\sigma^2_0+\kappa_0(\mu-\mu_0)^2+(n-1)s^2+n(\bar{y}-\mu)^2}{2}\tau} \\
+&=&
+\tau^{\frac{\nu_n+1}{2}-1}e^{-\frac{\nu_n\sigma^2_n+\kappa_n(\mu_n-\mu)^2}{2}\tau}
+\end{eqnarray*}
+where
+\begin{eqnarray*}
+\mu_n 
+&=& \frac{\kappa_0}{\kappa_0+n}\mu_0+\frac{n}{\kappa_0+n}\bar{y}\\
+\kappa_n &=& \kappa_0+n\\
+\nu_n &=& \nu_0+n\\
+\nu_n\sigma^2_n &=& \nu_0\sigma^2_0+(n-1)s^2+\frac{\kappa_0n}{\kappa_0+n}(\bar{y}-\mu_0)^2
+\end{eqnarray*}
+so $\mu,\tau|y \sim$ $\text{Normal-Gamma}\left(\mu_n,\kappa_n,\frac{\nu_n}{2},\frac{\nu_n\sigma^2_n}{2}\right)$, and we observe that Normal-Gamma is a conjugate prior for this model. The conditional posterior density of $\mu$, given $\tau$, is proportional to the joint posterior density
+with $\tau$ held constant, so we have
+\[
+\mu|\tau,y \sim \mathcal{N}\left(\mu_n,\frac{1}{\tau\kappa_n}\right)\text{.}
+\]
+Similarly, the conditional posterior density of $\tau$, given $\mu$, is proportional to the joint posterior density with $\mu$ held constant, so:
+\[
+\tau|\mu,y \sim \text{G}\left(\frac{\nu_n}{2},\frac{\nu_n\sigma^2_n+\kappa_n(\mu_n-\mu)^2}{2}\right)\text{.}
+\]
+It is now time to determine the marginal posterior distributions.
+\[
+p(\mu|y) = \int_{0}^{+\infty}p(\mu,\tau|y)d\tau \propto \int_{0}^{+\infty}\tau^{\frac{\nu_n+1}{2}-1}e^{-\frac{\nu_n\sigma^2_n+\kappa_n(\mu_n-\mu)^2}{2}\tau d\tau}\text{.}
+\]
+If $A(\mu) = \nu_n\sigma^2_n+\kappa_n(\mu_n-\mu)^2$ and we make the change of variable $z=\frac{A(\mu)}{2}\tau$, we get:
+\begin{eqnarray*}
+p(\mu|y) 
+&\propto& 
+A(\mu)^{-\frac{\nu_n+1}{2}}\int_{0}^{+\infty}z^{\frac{\nu_n+1}{2}-1}e^{-z}dz\\ &\propto&  A(\mu)^{-\frac{\nu_n+1}{2}} = \left(1+\frac{(\mu_n-\mu)^2}{\nu_n\frac{\sigma^2_n}{\kappa_n}}\right)^{-\frac{\nu_n+1}{2}}\text{,}
+\end{eqnarray*}
+so $\mu|y \sim t_{\nu_n}(\mu_n,\frac{\sigma^2_n}{\kappa_n})$, which, as expected, is the same distribution that $\mu|y$ follows without the reparameterization of the normal model with the precision parameter. For the marginal posterior of $\tau|y$:
+\begin{eqnarray*}
+p(\tau|y) 
+&=& \int_{-\infty}^{+\infty}p(\mu,\tau|y)d\mu \propto \tau^{\frac{\nu_n+1}{2}-1}e^{-\frac{\nu_n\sigma^2_n}{2}\tau}\int_{-\infty}^{+\infty}e^{\frac{(\mu-\mu_n)^2}{2}\tau\kappa_n}\\
+&\propto& \tau^{\frac{\nu_n+1}{2}-1}e^{-\frac{\nu_n\sigma^2_n}{2}\tau}(\kappa_n\tau)^{-\frac{1}{2}}\propto \tau^{\frac{\nu_n}{2}-1}e^{-\frac{\nu_n\sigma^2_n}{2}\tau}\text{,}
+\end{eqnarray*}
+so $\tau|y \sim \text{G}\left(\frac{\nu_n}{2},\frac{\nu_n\sigma^2_n}{2}\right)$.  
+
+\noindent (P4) In this case, $p(\mu,\tau) \propto \tau^{-\frac{1}{2}}$.
+Let's find the joint posterior distribution:
+\[
+p(\mu,\tau|y) \propto p(y|\mu,\tau)p(\mu,\tau) \propto \tau^{\frac{n-1}{2}}e^{-\frac{(n-1)s^2+n(\bar{y}-\mu)^2}{2}\tau}\text{.}
+\]
+The conditional posterior density of $\mu$, given $\tau$, is proportional to the joint posterior density
+with $\tau$ held constant, so we have $\mu|\tau,y \sim \mathcal{N}(\bar{y},\frac{1}{n\tau})$.
+Similarly, the conditional posterior density of $\tau$, given $\mu$, is proportional to the joint posterior density with $\mu$ held constant, so: $\tau|\mu,y \sim \text{G}\left(\frac{n+1}{2}, \frac{(n-1)s^2+n(\bar{y}-\mu)^2}{2}\right)$. Lastly, we will determine the marginal distributions:
+\[
+p(\mu|y) = \int_{0}^{+\infty}p(\mu,\tau|y)d\tau \propto \int_{0}^{+\infty}\tau^{\frac{n-1}{2}}e^{-\frac{A(\mu)}{2}\tau}d\tau\text{,}
+\]
+where $A(\mu) = nM_2+n(\bar{y}-\mu)^2$, $M_2=\frac{\sum\limits_{i=1}^{n}(y_i-\bar{y})^2}{n}$ and we make the change of variable $z = \frac{A(\mu)}{2}\tau$, so we get:
+\[
+p(\mu|y) \propto (A(\mu))^{-\frac{n+1}{2}}\int_{0}^{+\infty}z^{\frac{n-1}{2}}e^{-z}dz \propto (A(\mu))^{-\frac{n+1}{2}} = \left(1+\frac{(\mu-\bar{y})^2}{n\frac{M_2}{n}}\right)^{-\frac{n+1}{2}}
+\]
+so $\mu|y \sim t_n\left(\bar{y},\frac{M_2}{n}\right)$.
+For the marginal posterior of $\tau|y$:
+\begin{eqnarray*}
+p(\tau|y) 
+&=& \int_{-\infty}^{+\infty}p(\mu,\tau|y)d\mu \propto \tau^{\frac{n-1}{2}}e^{-\frac{(n-1)s^2}{2}\tau}\int_{-\infty}^{+\infty}e^{-\frac{(\mu-\bar{y})^2}{2}n\tau}\\
+&\propto& \tau^{\frac{n-1}{2}}e^{-\frac{(n-1)s^2}{2}\tau}\tau^{-\frac{1}{2}}\propto \tau^{\frac{n}{2}-1}e^{-\frac{(n-1)s^2}{2}\tau}
+\end{eqnarray*}
+so $\tau|y \sim \text{G}\left(\frac{n}{2},\frac{(n-1)s^2}{2}\right)$.
+
+###################################################################
+###################################################################
+
+
+##### **EXERCISE 4**
+
+Using a point estimator for posterior inference of parameters is 
+preferred in some cases. The so-called bayesian estimator corresponds to the posterior mean $\mathbb{E}(\theta|y)=\mathbb{E}(\mu,\sigma^2|y)$. 
+Compute the posterior mean under (i) prior P2 and (ii) under prior P3. In both cases determine $95\%$ credible intervals for both parameters.  
+
+
+**SOLUTION**
+
+\noindent (P2) In Exercise 1, we proved the following:
+\[
+\mu|y \sim t_{n-1}\left(\bar{y}\frac{s^2}{n}\right)
+\]
+\[
+\sigma^2|y \sim \text{Inv-}\chi^2(n-1,s^2)
+\]
+so we can calculate the posterior mean as follows:
+\[
+E(\theta|y) = E(\mu,\sigma^2|y) = (E(\mu|y),E(\sigma^2|y)) = \left(\bar{y}, \frac{(n-1)s^2}{n-3}\right) \text{.}
+\]
+To determine the $95\%$ credible interval for $\mu$, we observe that $t = \frac{\mu-\bar{y}}{s/\sqrt{n}} \sim t_{n-1}$, so, since the t-distribution is symmetric, the requested credible interval is:
+\[
+\bar{y} \pm t_{n-1,0.025}\frac{s}{\sqrt{n}}\text{,}
+\]
+where $t_{n-1,0.025}$ is the upper $0.025$-quantile of the $t_{n-1}$ distribution. As for the $95\%$ credible interval for $\sigma^2$, we observe that $X = \frac{(n-1)s^2}{\sigma^2} \sim \chi^2_{n-1}$, so the requested credible interval is:
+\[
+\left[\frac{(n-1)s^2}{\chi^2_{n-1,0.975}},\frac{(n-1)s^2}{\chi^2_{n-1,0.025}}\right]\text{,}
+\]
+where $\chi^2_{n-1,0.975}$ is the lower $0.025$-quantile, and $\chi^2_{n-1,0.025}$ is the upper $0.025$-quantile of the $\chi^2_{n-1}$ distribution.
+
+
+\vspace{5mm} \noindent (P3) In Exercise 1, we proved that:
+\[
+\mu|\sigma^2 \sim N\left(\mu_n, \frac{\sigma_n^2}{\kappa_n}\right)
+\]
+\[
+\sigma^2|y \sim \text{Inv-}\chi^2\left(\nu_n,\sigma^2_n\right)
+\]
+so the posterior mean is equal to:
+
+\[
+E(\theta|y) = E(\mu,\sigma^2|y) = (E(\mu|y),E(\sigma^2|y)) = \left(\mu_n, \frac{\nu_n\sigma^2_n}{\nu_n-2}\right) \text{.}
+\]
+
+\noindent For the credible interval we will work with the precision reparameterization. If a distribution $p(\mu,\tau)$ follows the $NG (\mu,\lambda,\alpha,\beta)$ we know that $\tau \sim G(\alpha,\beta)$ and $\mu|\tau \sim N(\mu, \frac{1}{\lambda\tau})$, where $\tau$ is the precision parameter ($\tau=\frac{1}{\sigma^2}$).
+\vspace{10pt}
+
+\noindent We have the random variables $Z = \sqrt{\lambda\tau} (\mu-\bar{x}) \sim N(0,1)$ and $Y = 2\beta\tau \sim G(\alpha,\frac{1}{2}) \equiv \chi^2_{2\alpha}$ independent. Therefore:
+\[
+\frac{Z}{\sqrt{\frac{Y}{2\alpha}}} = \frac{\mu-\bar{x}}{\sqrt{\frac{\beta}{\alpha\lambda}}} \sim t_{2\alpha}
+\]
+From the above it follows that a $(1-\alpha)-$credible region for our population's mean is
+\[
+\left[ \bar{x} - t_{2\alpha-1,1-\frac{\alpha}{2}} \cdot \sqrt{\frac{\beta}{\alpha\lambda}} , \bar{x} + t_{2\alpha-1,1-\frac{\alpha}{2}}\cdot \sqrt{\frac{\beta}{\alpha\lambda}} \right]
+\]
+Since the $t$ distribution is symmetric and unimodal, our credible region is a $(1-\alpha)-$ HPDI.
+
+
+\noindent As for the $95\%$ credible interval for $\sigma^2$, we observe that  $Y = 2\beta\tau \sim G(\alpha,\frac{1}{2}) \equiv \chi^2_{2\alpha} $, so the requested credible interval is:
+\[
+\left[\frac{2\beta}{\chi^2_{2\alpha,0.975}},\frac{2\beta}{\chi^2_{2\alpha,0.025}}\right]\text{,}
+\]
+where $\chi^2_{2\alpha,0.975}$ is the lower $0.025$-quantile, and $\chi^2_{2\alpha,0.025}$ is the upper $0.025$-quantile of the $\chi^2_{2\alpha}$ distribution.
+
+
+###################################################################
+###################################################################
+
+
+##### **EXERCISE 5**
+
+Shoshoni Indians used beaded rectangles as decoration (see the image below).
+
+```{r fig.align = "center", echo=FALSE, out.width = '40%'}
+knitr::include_graphics("beaded_rectangle.jpg")
+```
+
+In analyzing a sample of 20 such rectangles the following ratios of width/length were obtained:
+```{r}
+r <- c(.693, .606, .672, .844, .668, .670, .553, .662, .570, .628, .654, .601, .606, .933, .690, .749, .609, .615, .576, .611)
+```
+These data are generally used to test if the Shoshoni Indians had the sense of beauty in terms of the golden ratio $\phi$, here its inverse, that is, $1/\phi=0.618$. Since we don't deal with hypothesis testing in this project, you could search for an appropriate posterior distribution $p(\mu|r)$, if $r_i|\mu,\sigma^2\sim \mathcal{N}(\mu,\sigma^2)$, $1\leq i \leq 20$, the ratios are assumed to be conditionally independent and use the posterior mean $\mathbb{E}(\mu|r)$ as an estimate for the mean ratio and the 95% highest posterior density interval (HPDI) as a credible interval. You can perform this task with 2 different prior distributions, justify their choices and present the results. Your analysis should be done generically, with the appropriate code, in such a way that if more data or different data are available, then one can get directly the results and deduce the posterior mean, the (1-a)-HPDI interval and the binary response if $1/\phi$ is included, or not, in the interval.
+
+
+**SOLUTION**  
+\noindent Considering the absence of prior knowledge about the sense of beauty for Shoshoni Indians, we believe that it is preferred to use a non-informative prior distribution for our inference. In the relevant section of question 1 (Choosing a prior for our problem), we have examined some options to deal with such problems, i.e. absence of prior knowledge and normal distribution as a model likelihood. Based on our previous discussion, we decide to perform the required task with the priors (P2) and (P4), as defined in question 1.
+
+\noindent The following algorithm accepts as arguments the data of our measurements ($data$) the prior we want to use ($prior$), the statistical significance coefficient ($alpha$), and the candidate ratio value ($value$). More specifically we have:
+
+\noindent This algorithm informs the user about the value of the posterior mean,  the $(1- \alpha)-$ HPDI with an accuracy of four decimal points, and whether or not the value of the ratio belongs or not to the credible interval.
+
+\noindent Finally, it returns a vector that contains the parameters of the posterior distribution. These parameters can be used as the new prior distribution in case we want to update the existing dataset with new data or measurements.
+
+
+<dl class="dl-horizontal">
+  <dt>data:</dt> 
+  <dd>vector containing our measurements.</dd>
+    
+  <dt>prior:</dt>
+  <dd>vector with dimension four ($4$). This vector has as     elements the parameters of a distribution $NG(\mu,\lambda,\alpha,\beta)$ and which within the code is renamed to $p$ ($p[1] =\mu$, $p[2] =\lambda$, $p[3] =\alpha$, $p[4] =\beta$). The $prior$ argument has $(0,0,1/2,0)$ as default value,  which corresponds to the uniform prior distribution (P1). The value $0$ for $\mu$ is set for technical reasons (it is a free parameter). For the other three parameters, we can insert non-positive values to $prior$ but we must keep in mind that the corresponding parameters of a Normal-Gamma distribution are strictly positive. Regarding the parameter $\lambda$, we must secure that $\lambda> - \frac{n}{2}$ , where $n = length(data)$, so  the posterior distribution is valid.</dd>
+    
+  <dt>alpha:</dt>
+  <dd> statistical significance coefficient, default value = $0.05$.</dd>
+     
+  <dt>data:</dt>
+  <dd>the ratio value for which we want to check if it belongs to the reliability interval that we will build, default value = $\frac{1}{\phi} = 0.618$.</dd>
+</dl>
+
+
+
+\noindent We know that, if the prior follows a distribution $NG (\mu_0,\lambda_0,\alpha_0,\beta_0)$ and the likelihood follows $N(\mu,\tau^{-1})$ then the posterior will follow a distribution $NG (\mu_p,\lambda_p,\alpha_p,\beta_p)$ with
+
+\begin{eqnarray*}
+\mu_p
+&=& \frac{\lambda_0\mu_0+n\bar{x}}{\lambda_0+n}\\
+\lambda_p
+&=& \lambda_0 + n\\
+\alpha_p
+&=& \alpha_0 +\frac{n}{2}\\
+\beta_p 
+&=& 
+\beta_0 + \frac{n}{2} \left[ s^2 + \frac{\lambda_0 (\bar{x}-\mu_0)^2}{\lambda_0+n} \right]
+\end{eqnarray*}
+where $\bar{x}$ the sample mean and $s^2$ the empirical variance estimator.  
+
+<center> ***Interpretation of the parameters*** </center>
+
+\noindent If our prior is $\mu,\tau \sim \text{Normal-Gamma} \left(\mu_0,\kappa_0,\frac{\nu_0}{2},\frac{\nu_0\sigma^2_0}{2}\right)$ and our posterior is
+$\mu,\tau|y \sim \text{Normal-Gamma} \left(\mu_n,\kappa_n,\frac{\nu_n}{2},\frac{\nu_n\sigma^2_n}{2}\right)$ then we can interpret our parameters as follows:
+
+
+\noindent The posterior mean, $\mu_n$, constitutes a weighted average of the prior pseudo-mean and the sample mean, weighted by the number of associated pseudo-data. 
+
+
+\noindent The posterior precision, $\kappa_n$, is estimated from $\nu_0$  pseudo-data with sample mean $\mu$ and sample variance $\sigma^2_n$.
+
+
+\noindent The posterior degrees of freedom, $\nu_n$, of the t-distribution of $\mu|y$ are equal to the prior degrees of freedom of the t-distribution of $\mu$ plus the sample size $n$. 
+
+
+\noindent The posterior sum of squares, $\nu_n\sigma^2_n$, combines the prior sum of squares, the sample sum of squares, and an additional "interaction term" -needed due to the fact that the two sum of squares were computed with respect to different means. More specifically, the last term conveys the uncertainty induced by the difference between the sample mean and the prior mean, and if omitted, the sum of the first two terms underestimates the actual total squared deviation.
+
+<center> ***Algorithmic implementation*** </center>
+
+```{r}
+data <- c(.693, .606, .672, .844, .668, .670, .553, .662, .570, .628,
+       .654, .601, .606, .933, .690, .749, .609, .615, .576, .611)
+
+n <- length(data)
+mu <- mean(data)
+var <- var(data)
+prior <- c(0,0,1/2,0)
+p <- prior
+
+p[4] <- p[4] + (1/2)*((n-1)*var + ( n*p[2]*(mu-p[1])^2)/(p[2]+n))
+p[1] <- (p[2]*p[1] + n*mu)/(p[2]+n) 
+p[2] <- p[2] + n
+p[3] <- p[3] + n/2
+
+post_mean <- mu
+```
+
+
+\noindent As we have seen at Exercise 4, a $(1-\alpha)-$credible interval for the population mean is
+\[
+\left[ \bar{x} - t_{2\alpha-1,1-\frac{\alpha}{2}} \cdot \sqrt{\frac{\beta}{\alpha\lambda}} , \bar{x} + t_{2\alpha-1,1-\frac{\alpha}{2}}\cdot \sqrt{\frac{\beta}{\alpha\lambda}} \right]
+\]
+Since the $t$ distribution is symmetric and unimodal we have that the above interval is a $(1-\alpha)-$HPDI interval for the mean.
+
+ 
+```{r}
+alpha = 0.05
+
+inter <- p[1] + qt(c(alpha/2, 1-alpha/2), 2*p[3]-1)*sqrt(p[4]/(p[3]*p[2]))
+```
+
+
+```{r}
+my_function <- function(data,prior = c(0,0,1/2,0),alpha=0.05,value = 0.618) {
+
+n <- length(data)
+mu <- mean(data)
+var <- var(data)
+p <- prior
+
+p[4] <- p[4] + (1/2)*((n-1)*var + (n*p[2]*(mu-p[1])^2)/(p[2]+n) )
+p[1] <- (p[2]*p[1] + n*mu)/(p[2]+n) 
+p[2] <- p[2] + n
+p[3] <- p[3] + n/2
+
+post_mean <- mu
+
+inter <- p[1] + qt(c(alpha/2, 1-alpha/2), 2*p[3]-1)*sqrt(p[4]/(p[3]*p[2]))
+
+belongs = "NULL"
+
+if (inter[1] <= value && value <= inter[2]) {
+  belongs = "lies"
+} else {
+  belongs = "does not lie"
+}
+
+inter <- format(inter,digits=4)
+
+print(paste("The posterior mean is equal to",post_mean))
+print(paste("The",1-alpha,"HPDI for the mean is",inter[1],inter[2]))
+print(paste("The ratio",value,belongs,"in the credible interval!"))
+return(p)
+#end 
+}
+
+# testing with P1 to verify that our function works smoothly
+# set.seed(123)
+# P1 <- c(0,0,-3/2,0)
+# test <- my_function(r,P1)
+# new_data <- runif(1000,min=0.555,max=0.888)
+# update <- my_function(new_data,test)
+# total_data <- c(r,new_data)
+# verification <- my_function(total_data,P1)
+# update == verification
+# update
+# verification
+
+
+P2 <- c(0,0,-1/2,0)
+P4 <- c(0,0,0,0)
+
+reference <- my_function(r,P2)
+jeffreys <- my_function(r,P4)
+```
+
+We observe that under prior (P2), the ratio $1/\phi = 0.618$ lies in the $95\%$-HPDI credible interval, whereas in the case of the prior (P4), it does not. So, in the first case, we accept our null hypothesis and we reject it in the latter.
+
+This difference exhibits that the choice of prior directly affects our results and statistical inference. The lower bounds for both of our credible intervals are extremely close to the ratio $1/\phi$, causing us difficulty to derive reliable inference. We do, however, have some indications that the answer to our question is positive; when we use the prior (P4), our value is just outside the interval, and 0.0003 below the lower border of the C.I., but when the prior (P2) is utilized, we find that the value is inside the interval, and 0.001 above of the lower border. The fact that the rejection or acceptance of the null hypothesis is borderline renders further investigation necessary. An idea to surmount this problem is to use a different prior distribution that corresponds with our problem's specification.  
+
+A possible solution could be the prior (P1) (the "naive" flat prior).
+
+```{r}
+P1 <- c(0,0,-3/2,0)
+flat <- my_function(r,P1)
+```
+
+In this case, the ratio $1/\phi$ lies in the $95\%$-HPDI credible interval and we deduce that the Shoshoni Indians had a sense of beauty in terms of the golden ratio. We have some indications that the answer to our question is positive but the fact that the rejection or acceptance of the null hypothesis is borderline, We believe that more investigation is needed.  
+
+Our results are presented in the following table:
+
+<center>
+
+| Prior |  Confidence Interval | $1/\phi = 0.618$ lies in the C.I.|
+|:-----:|:--------------------:|:-------------------------------:|
+| P1    |  (0.6141, 0.7069)    |              Yes                |
+| P2    |  (0.6170, 0.7040)    |              Yes                |
+| P4    |  (0.6183, 0.7027)    |              No                 |
+
+</center>
+
+###################################################################
+###################################################################
+
+##### **EXERCISE 6**
+
+The above analysis is theoretically problematic since ratios are positive quantities. Change the modeling assumptions and assume that data are still conditionally independent, but $\log r_i|\mu,\sigma^2 \sim \mathcal{N}(\mu,\sigma^2)$. Answer the same questions as in Exercise 5, by paying attention to the transformations and the different assumptions.
+
+**SOLUTION**  
+\noindent (P2) If $r_i|\mu,\sigma^2 \sim \log \mathcal{N}(\mu,\sigma^2)$, $1\leqslant i \leqslant 20$ and $p(\mu,\sigma^2) \propto \frac{1}{\sigma^2}$ our posterior distribution is of the form
+\[
+p(\mu,\sigma^2|r) \propto \frac{1}{\sigma^2} \prod_{i=1}^{20} \frac{1}{y_i} \left( \frac{1}{\sigma^2} \right)^{\frac{n}{2}} e^{ - \frac{\sum_{i=1}^{20} (\ln r_i-\mu)^2 }{2\sigma^2} }
+\]
+We choose to use a precision-reparameterization, and we
+\begin{eqnarray*}
+p(\mu,\tau|r) &=& p\left(\mu,\frac{1}{\tau}\right) \tau^{-2}\\
+&\propto&\displaystyle \tau\cdot \tau^{\frac{n}{2}}\cdot\tau^{-2}\cdot e^{ - \frac{\sum_{i=1}^{20} (\ln r_i-\mu)^2 }{2}\tau} \quad (\star)\\
+&\propto& \tau^{\frac{n}{2}-1} e^{- \frac{(n-1)l^2+ n( \overline{\ln r}-\mu)^2}{2}\tau }\\
+&\propto& \tau^{\frac{n}{2}-1} e^{- \frac{(n-1)l^2}{2}\tau} e^{- \frac{n( \overline{\ln r}-\mu)^2}{2}\tau}
+\end{eqnarray*}
+We deduce that:
+\[
+\mu,\tau|r \sim \text{Normal-Gamma}\left( \overline{\ln r},n, \frac{n}{2}, \frac{(n-1)l^2}{2} \right)
+\]
+We can rewrite the $(\star)$ relation using the equality $\sum_{i=1}^{20} (\ln r_i-\mu)^2 = (n-1)l^2 + n(\overline{\ln r}-\mu)^2$, where $\overline{\ln r} = \frac{\sum_{i=1}^{20} \ln r_i}{20}$ and $l^2 = \frac{\sum_{i=1}^{20} ( \ln r_i - \overline{\ln r})^2 }{19}$.
+
+\noindent For the marginal posterior of the mean, we have
+\begin{eqnarray*}
+p(\mu|y) &=& \int_{0}^{\infty} p(\mu,\tau|r)\, d\tau\\
+&\propto& \int_{0}^{\infty} \tau^{\frac{n}{2}-1} e^{- \frac{(n-1)l^2}{2}\tau} e^{- \frac{n( \overline{\ln r}-\mu)^2}{2}\tau}\, d\tau
+\end{eqnarray*}
+
+\noindent If $A(\mu) = (n-1)l^2 + n(\overline{\ln r}-\mu)^2$, we have: $z=\frac{A(\mu)}{2}\tau$, $\tau = \frac{2}{A(\mu)}z \Rightarrow d\tau = \frac{2}{A(\mu)}d z $, and so
+
+\begin{eqnarray*}
+p(\mu|y) &=& (A(\mu))^{-\frac{n}{2}+1} (A(\mu))^{-1} \int_{0}^{\infty} z^{\frac{n}{2}}e^{-z}\,dz\\
+&\propto& (A(\mu))^{-\frac{n}{2}} \propto \left( 1 + \frac{(\mu-\overline{\ln r})^2}{(n-1)\frac{l^2}{n}} \right)^{-\frac{n-1+1}{2}}
+\end{eqnarray*}
+We deduce that: $\mu|y \sim t_{n-1}( \overline{\ln r}, \frac{l^2}{n} )$.
+
+\noindent (P3) Using the reparameterization $\tau=\frac{1}{\sigma^2}$ our likelihood is of the form
+\[
+p(r|\mu,\tau) \propto 
+\tau^{\frac{n}{2}}\cdot e^{ - \frac{\sum_{i=1}^{20} (\ln r_i-\mu)^2 }{2}\tau}
+\]
+
+\noindent We observe that our likelihood can be written as $p(r|\mu,\sigma^2) = p(\tau)p(\mu|\tau)$, where $\tau$ follows a Gamma distribution and $\mu|\tau$ follows a Normal distribution, so the conjugate prior of our model is of the form
+\begin{eqnarray*}
+p(\mu,\tau) &=&
+\tau^{\frac{\nu_0+1}{2}-1} e^{-\frac{\nu_0\sigma^2_0+\kappa_0(\mu-\mu_0)^2}{2}\tau}
+\end{eqnarray*}
+
+\noindent Our joint posterior distribution is analogous to 
+\begin{eqnarray*}
+p(\mu,\tau|r) &=& p(\mu,\tau) p(r|\mu,\sigma^2)\\
+&\propto&\displaystyle \tau^{\frac{\nu_0+1}{2}-1} e^{-\frac{\nu_0\sigma^2_0+\kappa_0(\mu-\mu_0)^2}{2}\tau}\cdot \tau^{\frac{n}{2}}\cdot e^{ - \frac{\sum_{i=1}^{20} (\ln r_i-\mu)^2 }{2}\tau} \\
+&\propto& \tau^{\frac{\nu_0+n+1}{2}-1} e^{- \frac{\nu_0\sigma^2_0+\kappa_0(\mu-\mu_0)^2 + (n-1)l^2 + n( \overline{\ln r}-\mu)^2}{2}\tau}
+\end{eqnarray*}
+where $\overline{\ln r} = \frac{\sum_{i=1}^{20} \ln r_i}{20}$ and $l^2 = \frac{\sum_{i=1}^{20} ( \ln r_i - \overline{\ln r})^2}{19}$. We deduce that:
+\[
+\mu,\tau|r \sim \text{Normal-Gamma}\left(\mu_n,\kappa_n,\frac{\nu_n}{2},\frac{\nu_n\sigma^2_n}{2}\right)
+\]
+where
+\begin{eqnarray*}
+\mu_n 
+&=& \frac{\kappa_0}{\kappa_0+n}\mu_0+\frac{n}{\kappa_0+n}\overline{\ln y}\\
+\kappa_n &=& \kappa_0+n\\
+\nu_n &=& \nu_0+n\\
+\nu_n\sigma^2_n &=& \nu_0\sigma^2_0+(n-1)l^2+\frac{\kappa_0n}{\kappa_0+n}(\overline{\ln y}-\mu_0)^2
+\end{eqnarray*}
+
+\noindent For the marginal posterior distribution $\mu|y$ we have
+\[
+p(\mu|y) = \int_{0}^{+\infty}p(\mu,\tau|y)d\tau \propto \int_{0}^{+\infty}\tau^{\frac{\nu_n+1}{2}-1}e^{-\frac{\nu_n\sigma^2_n+\kappa_n(\mu_n-\mu)^2}{2}\tau d\tau}\text{.}
+\]
+If $A(\mu) = \nu_n\sigma^2_n+\kappa_n(\mu_n-\mu)^2$ and we make the change of variable $z=\frac{A(\mu)}{2}\tau$, we get:
+\begin{eqnarray*}
+p(\mu|y) 
+&\propto& 
+A(\mu)^{-\frac{\nu_n+1}{2}}\int_{0}^{+\infty}z^{\frac{\nu_n+1}{2}-1}e^{-z}dz\\ &\propto&  A(\mu)^{-\frac{\nu_n+1}{2}} = \left(1+\frac{(\mu_n-\mu)^2}{\nu_n\frac{\sigma^2_n}{\kappa_n}}\right)^{-\frac{\nu_n+1}{2}}\text{,}
+\end{eqnarray*}
+so $\mu|y \sim t_{\nu_n}(\mu_n,\frac{\sigma^2_n}{\kappa_n})$.  
+
+We observe that the only change induced by the transformation made is that we now express our data as $\log r$, instead of $r$. This is obvious if we look at the new posterior distributions for $(\mu,\tau)$ and $\mu|r$, as well as the parameter interpretation.  
+
+Following the same train of thought as in Exercise 5, we use the priors (P2) and (P4) for our analysis. 
+
+```{r}
+r <- c(.693, .606, .672, .844, .668, .670, .553, .662, .570, .628,
+       .654, .601, .606, .933, .690, .749, .609, .615, .576, .611)
+
+my_function2 <- function(data, prior = c(0,0,-3/2,0), alpha=0.05, value = log(0.618)) {
+  n <- length(data)
+  mu <- mean(log(data))
+  var <- var(log(data))
+  p <- prior
+  p[4] <- p[4] + (1/2)*((n-1)*var + (n*p[2]*(mu-p[1])^2)/(p[2]+n) )
+  p[1] <- (p[2]*p[1] + n*mu)/(p[2]+n)
+  p[2] <- p[2] + n
+  p[3] <- p[3] + n/2
+  post_mean <- mu
+  inter <- p[1] + qt(c(alpha/2, 1-alpha/2), 2*p[3]-1)*sqrt(p[4]/(p[3]*p[2]))
+  belongs = "NULL"
+  if (inter[1] <= value && value <= inter[2]) {
+    belongs = "lies"
+  } else {
+    belongs = "does not lie"
+  }
+  inter <- format(inter,digits=4)
+  print(paste("The posterior mean is equal to",post_mean))
+  print(paste("The",1-alpha,"HPDI for the mean is",inter[1],inter[2]))
+  print(paste("The ratio",value,belongs,"in the credible interval!"))
+  return(p)
+}
+
+# testing with P1 to verify that our function works smoothly
+# P1 <- c(0,0,-3/2,0)
+# dokimi2 <- my_function2(r,P1)
+# new_data2 <- runif(1000,min=0.555,max=0.888)
+# update2 <- my_function2(new_data2, dokimi2)
+# total_data2 <- c(r,new_data2)
+# verification2 <- my_function2(total_data2,P1)
+# all.equal(update2,verification2,tolerance=0)
+# update2
+# verification2
+
+P2 <- c(0,0,-1/2,0)
+P4 <- c(0,0,0,0)
+
+reference2 <- my_function2(r,P2)
+jeffreys2 <- my_function2(r,P4)
+```
+
+We observe that under both priors (P2) and (P4), the ratio $\log (1/\phi) = -0.4812$ lies in the respective $95\%$-HPDI credible intervals. As a result, we deduce that the Shoshoni Indians had a sense of beauty in terms of the golden ratio.  
+
+In contrast to Exercise 5, we can draw a conclusion just by examining the results given by the two priors mentioned. This could be attributed to the fact that, due to our transformation $r_i \mapsto \log r_i$, the mass of the parameter space has now been transferred to the positive numbers only.  
+
+However, the lower bound of our credible interval, in the case of the prior (P4), is still extremely close to the ratio $\log (1/\phi)$.
+
+```{r}
+flat2 <- my_function2(r,P1)
+```
+
+If we employ the prior (P1) once again, we will see that the ratio lies in the $95\%$-HPDI 
+credible interval, which is helpful in deriving reliable inference regarding our hypothesis. To conclude, we stand by our initial statement; the Shoshoni Indians did in fact have a sense of beauty.  
+
+Our results are presented in the following table:
+
+<center>
+
+| Prior |  Confidence Interval | $\log (1/\phi) = -0.4812$ lies in|
+|:-----:|:--------------------:|:--------------------------------:|
+| P1    |  (-0.4876, -0.3586)  |              Yes                 |
+| P2    |  (-0.4835, -0.3626)  |              Yes                 |
+| P4    |  (-0.4818, -0.3643)  |              Yes                 |
+
+</center>
+
+
+##### **EXERCISE 7**
+
+The following code implements a 2-stage Gibbs sampler
+for producing a simulated sample from the marginal posterior distribution of the mean $\mu|y$ under prior P2.
+```{r}
+set.seed(123)
+nsim=5000   
+#condition of Example 3
+n=9; ybar=0; s=3
+X=s2=array(0, dim=c(nsim,1)) #init arrays
+X[1]=0 #init chains
+s2[1]=1
+for (i in 2:nsim){ #sampling loop
+X[i]= rnorm(1,ybar,sqrt(s2[i-1]/n))
+s2m = (1-1/n)*s^2 + (ybar-X[i])^2
+s2[i]= n*s2m/rchisq(1,n)
+}
+
+par(mfrow=c(3,1),mar=c(4,4,2,1))
+plot(1:nsim,X,ty="l",lwd=2,xlab="Iterations", ylab="",
+     main="Gibbs sampler for mean - t8")
+hist(X,freq=F,xlim=c(-4,4),ylim=c(0,.4),col='grey',ylab="",xlab="",breaks=35,main="")
+curve(dt(x,8),lwd=2,add=T, col='red')
+acf(X, main="")
+```
+
+Explain what you see in the graphs.
+Compare this histogram with the one that you obtained in exercise 2.
+What can you say about this 2-stage iterative algorithm? By analyzing the code, try to understand how it works and try to explain its importance. 
+
+
+**SOLUTION** 
+
+<center> ***Gibbs Sampler*** </center>
+
+
+\noindent The Gibbs sampler is a MCMC method that can be used to simulate a sample from a joint distribution $(X,Y)$ and it can be extended by a natural, we could say, way to distributions of higher dimension. In general it is difficult for us to find explicitly the p.d.f. of the joint distribution, $\mathbb{P}(X,Y)$, but we may be able to find with relative ease the full conditionals, $\mathbb{P}(X|Y)$ and $\mathbb{P}(Y|X)$. 
+
+\noindent The steps we follow to simulate a sample of size $n$ from our target distribution using this method can be described as follows:
+
+   Step 1. Initialization $X,Y \longrightarrow (X_0,Y_0)$
+
+    
+   Step 2. For $i=1,2,\ldots,n$ repeat  
+    Sample from $X_i \sim \mathbb{P}(X|Y=Y_{i-1})$  
+    Sample from $Y_i \sim \mathbb{P}(Y|X=X_{i})$
+
+
+\noindent The initial values $X_0, Y_0$ are chosen arbitrarily, however, it would be preferred to select these points in an area where enough density is concentrated (e.g. via mle), so that the convergence of the algorithm can be achieved faster.\vspace{10PT}
+
+\noindent Following the iterative process that we described above, we form a sequence of pairs 
+\[
+(X_1,Y_1), (X_2,Y_2), \ldots, (X_n,Y_n)
+\]
+which is a Markov chain, since the conditional distribution of $(X_i,Y_i)$ given all the previous pairs depends only on $(X_{i-1},Y_{i-1})$, and whose stationary distribution is our target distribution, $\mathbb{P}(X,Y)$.\vspace{10PT}
+
+\noindent We know that the sequence of $(X_{i-1},Y_{i-1})$ converges to the stationary distribution independently of the starting values, but some of the first terms of this sequence may be outside of the stationary distribution. For that reason, a common practice is to  discard the first  $k$ ($1\leqslant k < n$) terms of the Markov chain. We aim to chose an index $k$ such that the terms $(X_{i-1},Y_{i-1})_{k< i \leqslant n}$ lie in our stationary distribution. 
+
+\noindent The remaining terms of our chain
+\[
+(X_{k+1},Y_{k+1}), (X_{k+2},Y_{k+2}), \ldots, (X_{n},Y_{n})
+\]
+constitute our simulated sample from the target distribution.
+
+\noindent In our case we have:
+<ul> 
+<li>We decide the realization of $n=5000$ simulations from $\mathbb{P}(\mu|y)$ given a sample $y$, of size $9$ with $\bar{y}=0$ and $s^2=9$.
+```{r}
+    set.seed(123)
+    nsim=5000   
+    #condition of Example 3
+    n=9; ybar=0; s=3
+```
+</li>
+
+<li> We generate to vectors $X,S^2 \in\mathbb{R}^{5000\times 1}$ in which the simulated sample points will be stored and we proceed to their initialization $(X_0,S^2_0)=(0,1)$.
+    
+```{r}
+    X=s2=array(0, dim=c(nsim,1)) #init arrays
+    X[1]=0 #init chains
+    s2[1]=1
+```    
+</li>    
+
+<li>We proceed to the implementation of the iterative part of the algorithm as follows
+    
+For $i=1,2,\ldots,n$ repeat
+    
+Sample from $X_i = (\mu|\sigma^2,y) \sim\mathcal{N}\left(\bar{y}, \frac{\sigma^2_{(i-1)}}{n}\right)$
+    
+Sample from $Y_i \sim (\sigma^2|\mu,y) \sim \text{Inv-}\chi^2\left(n, \sum_{i=1}^n (y_i-\mu)^2\right)$
+    
+```{r}
+    for (i in 2:nsim){ #sampling loop
+    X[i]= rnorm(1,ybar,sqrt(s2[i-1]/n))
+    s2m = (1-1/n)*s^2 + (ybar-X[i])^2
+    s2[i]= n*s2m/rchisq(1,n)
+    }
+```
+</li>
+</ul>
+
+<center> ***Visual MCMC diagnostics*** </center>
+
+\noindent In the first graph, we see the sequence $X_t$, where $X=\mu|y$, $t$ is the number of iterations and $1\leq t \leq 5000$, when simulated using the formula $X_{t+1} = \bar{y}+\frac{s_t}{\sqrt{n}}Z$, $Z \sim N(0,1)$. This graph is called a trace plot, and it is the most common graphical convergence diagnostic method. This graphical method is used to visualize how the Markov chain is moving around the state space, that is, how well it is mixing.  It is often said that a good trace plot should look like a hairy caterpillar, i.e. wildly going up and down, within reasonable estimates of the parameters -which is what we see here. When the sampler has converged the chains show one horizontal band, as in the given figure.  
+
+\noindent In the second graph, we observe a histogram of the values in the trace-plot, that is, the distribution of the values of $\mu$ in the chain. The particular graph displayed indicates good mixing, and by adding the density curve of the real distribution of $\mu$, we remark that the histogram follows the curve sufficiently. That is a very good sign that we are indeed sampling from the marginal posterior distribution of $\mu$.  
+
+\noindent In the third graph, we have an ACF plot. Unlike iid sampling, MCMC algorithms, such as the Gibbs sampler, result in correlated samples. The lag-k (sample) autocorrelation
+is defined to be the correlation between the samples k steps apart. The autocorrelation plot shows values of
+the lag-k autocorrelation function (ACF) against increasing k values. For fast-mixing Markov chains, lag-k
+autocorrelation values drop down to (practically) zero quickly as k increases. That's exactly what we observe here, where the maximum lag is set to default ($10\log_{10}(N/m)$ where N is the number of observations and m the number of series), as we have not set one manually in the acf function in R.  
+
+\noindent All of the above graphs constitute the most common visual MCMC diagnostic tools for convergence. However, we cannot prove that our chain has converged by utilizing these tools, as we can never be sure of this. What we can do is detect any errors regarding our convergence and its rate, how well and quickly our chain is mixing, if we must discard part of our sample through the burn-in period etc.
+
+<center> ***Histogram comparison*** </center>
+
+```{r}
+par(mfrow=c(2,1))
+hist(X,freq=F,xlim=c(-4,4),ylim=c(0,.4),col='grey',ylab="",xlab="",
+     breaks=35, main = "Histogram of sample from Gibbs algorithm")
+curve(dt(x,8),lwd=2, add=T, col='red')
+hist(sample, prob = T, xlim = c(-5,5), ylim = c(0,0.45),breaks = 35, col = "grey",main = "Histogram of sample directly from the t-distribution")
+curve(ybar+(s/sqrt(n))*dt(x,n-1), from = -5, to = 5,col = "red", lwd = 2, add = TRUE)
+```
+  
+
+We observe that the two histograms are almost identical, meaning that, by sampling with the Gibbs algorithm it is as if we have sampled directly from the distribution of $\mu|y$!
+
+<center> ***The importance of Gibbs sampling*** </center>
+
+\noindent The importance of the Gibbs sampler lies in its ability to generate a sample from the target distribution f(x), without
+requiring f(x). Such a property may be crucial for our analysis, especially in cases where are able to find an explicit expression 
+for each one of the full conditionals of our target distribution, while we are unable to find our target's distribution form,
+or it is very difficult to sample from it directly. Additionally, by simulating a large enough sample with the Gibbs sampler, we can calculate 
+any characteristic of f(x) to the desired degree of accuracy.
+
+\noindent Another advantage of this algorithm, which becomes progressively more convenient, as the dimension of the target distribution increases, 
+is that it reduces our problem to the simulation of d univariate distributions, instead of directly simulating a d-dimensional random vector.
+
+\noindent Compared to the general Metropolis-Hastings algorithm, we often favour Gibbs sampling because its acceptance probability is equal to 1, so the algorithm 
+always moves; ensuring a smaller number of iterations than a general MH algorithm, achieving faster convergence rates and making the algorithm more efficient.
+
+\noindent However, in order to reap the benefits of this algorithm, we need to know the full conditionals of f(x), which are not always easy
+to obtain.
+
+###################################################################
+###################################################################
+
+
+##### **EXERCISE 8**
+
+Modify the above code in order to obtain the corresponding graphs for the marginal posterior of the variance $\sigma^2|y$. Verify graphically that the distribution that you have obtained is the same as the theoretical one by changing the red curve into the one corresponding to the true posterior density of $\sigma^2|y$.
+
+
+**SOLUTION**
+
+
+```{r}
+set.seed(123)
+nsim=5000
+
+n=9; ybar=0; s=3
+Y=mu=array(0, dim=c(nsim,1))
+Y[1]=1
+mu[1]=0
+for (i in 2:nsim){
+  s2m = (1-1/n)*s^2 + (ybar-mu[i-1])^2
+  Y[i]= n*s2m/rchisq(1,n)
+  mu[i]= rnorm(1,ybar,sqrt(Y[i]/n))
+}
+
+
+par(mfrow=c(3,1),mar=c(4,4,2,1))
+plot(1:nsim,Y,ty="l",lwd=2,xlab="Iterations", ylab="",
+     main="Gibbs sampler for variance - inv-chi^2")
+hist(Y,freq=F,xlim=c(0,40),ylim=c(0,.1),breaks=100,main="", xlab = "", ylab = "")
+curve(dchisq(((n-1)*s^2)/x,df=n-1)*((n-1)*s^2/x^2),lwd=2,col='red',add=T, from = 0,to=40)
+acf(Y, main="")
+```
+
+\noindent We remark that in the above code, and specifically in the first argument of the curve function, we used a complex expression, that we will now explain:  
+We want to plot the density curve of the scaled inverse-$\chi^2$ distribution, while the density function of $\chi^2$ is available through the "dchisq" function in R, so we will express the density function $f_X$ of $X$, $X \sim \text{inv-}\chi^2(n-1,s^2)$, in terms of the density function $f_Y$ of $Y$, $Y \sim \chi^2_{n-1}$. We know that $X = \frac{(n-1)s^2}{Y} = g(X)$, so:
+\[
+f_X(x) = f_Y(g^{-1}(x))\left|\frac{dg^{-1}(x)}{dx}\right| = \frac{(n-1)s^2}{x^2}f_Y\left(\frac{(n-1)s^2}{x}\right)
+\]
+Now, we can draw the density curve of $X$, using the expression above.
