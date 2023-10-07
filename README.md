@@ -1,6 +1,6 @@
 # Undergraduate Projects
 
-This repository contains 3 projects I completed during my undergraduate studies in Mathematics at the National and Kapodistrian University of Athens. All 3 projects are in RMarkdown format. More details about each project can be found below.
+This repository hosts three comprehensive projects that I completed during my undergraduate studies in Mathematics at the National and Kapodistrian University of Athens. Each project is documented in RMarkdown, offering detailed insights into their objectives and methodologies. Further information about each project can be found below.
 
 ## Bayesian Statistics Project
 A collaborative project with colleague Petros Koutsis, exploring the core principles of Bayesian data analysis. This project is structured into two integral components. The first phase focuses on the theoretical underpinnings, involving the derivation of posterior distributions under various prior specifications. The second phase delves into the computational aspects, including the investigation of Credible Intervals and the application of the Gibbs Sampler methodology.
